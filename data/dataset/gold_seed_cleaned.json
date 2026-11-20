@@ -1,0 +1,2413 @@
+[
+  {
+    "id": "ex_000001",
+    "grupo_id": "g_0001",
+    "split": "train",
+    "texto": "Hola, quisiera dos hamburguesas dobles sin cebolla y una porción de papas fritas, por favor",
+    "intencion": "pedido",
+    "tokens": [
+      "Hola",
+      ",",
+      "quisiera",
+      "dos",
+      "hamburguesas",
+      "dobles",
+      "sin",
+      "cebolla",
+      "y",
+      "una",
+      "porción",
+      "de",
+      "papas",
+      "fritas",
+      ",",
+      "por",
+      "favor"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "I-PRODUCTO",
+      "B-NEGACION",
+      "B-EXCLUSION",
+      "O",
+      "B-CANTIDAD",
+      "B-UNIDAD",
+      "O",
+      "B-PRODUCTO",
+      "I-PRODUCTO",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "hamburguesas dobles",
+          "producto_normalizado": "Hamburguesa Doble",
+          "cantidad": 2,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [
+            "cebolla"
+          ],
+          "sustituciones": [],
+          "restricciones_globales": []
+        },
+        {
+          "producto": "papas fritas",
+          "producto_normalizado": "Papas Fritas",
+          "cantidad": 1,
+          "unidad": "porción",
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "2x Hamburguesa Doble sin cebolla, 1x Papas Fritas",
+    "escenario": "multi_item_exclusion_stock_suficiente",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": [
+      "cortesia_inicio_fin",
+      "numero_en_letras"
+    ]
+  },
+  {
+    "id": "ex_000002",
+    "grupo_id": "g_0001",
+    "split": "train",
+    "texto": "buenas, me pones dos burger doble sin cebolla y una porcion de papitas xfa",
+    "intencion": "pedido",
+    "tokens": [
+      "buenas",
+      ",",
+      "me",
+      "pones",
+      "dos",
+      "burger",
+      "doble",
+      "sin",
+      "cebolla",
+      "y",
+      "una",
+      "porcion",
+      "de",
+      "papitas",
+      "xfa"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "I-PRODUCTO",
+      "B-NEGACION",
+      "B-EXCLUSION",
+      "O",
+      "B-CANTIDAD",
+      "B-UNIDAD",
+      "O",
+      "B-PRODUCTO",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "burger doble",
+          "producto_normalizado": "Hamburguesa Doble",
+          "cantidad": 2,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [
+            "cebolla"
+          ],
+          "sustituciones": [],
+          "restricciones_globales": []
+        },
+        {
+          "producto": "papitas",
+          "producto_normalizado": "Papas Fritas",
+          "cantidad": 1,
+          "unidad": "porción",
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "2x Hamburguesa Doble sin cebolla, 1x Papas Fritas",
+    "escenario": "multi_item_exclusion_stock_suficiente",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": [
+      "sinonimo",
+      "sin_tilde",
+      "abreviatura"
+    ]
+  },
+  {
+    "id": "ex_000003",
+    "grupo_id": "g_0001",
+    "split": "train",
+    "texto": "Este, dos hamburguesas dobles sin cebolla, y también una porción de papas, gracias",
+    "intencion": "pedido",
+    "tokens": [
+      "Este",
+      ",",
+      "dos",
+      "hamburguesas",
+      "dobles",
+      "sin",
+      "cebolla",
+      ",",
+      "y",
+      "también",
+      "una",
+      "porción",
+      "de",
+      "papas",
+      ",",
+      "gracias"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "I-PRODUCTO",
+      "B-NEGACION",
+      "B-EXCLUSION",
+      "O",
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-UNIDAD",
+      "O",
+      "B-PRODUCTO",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "hamburguesas dobles",
+          "producto_normalizado": "Hamburguesa Doble",
+          "cantidad": 2,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [
+            "cebolla"
+          ],
+          "sustituciones": [],
+          "restricciones_globales": []
+        },
+        {
+          "producto": "papas",
+          "producto_normalizado": "Papas Fritas",
+          "cantidad": 1,
+          "unidad": "porción",
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "2x Hamburguesa Doble sin cebolla, 1x Papas Fritas",
+    "escenario": "multi_item_exclusion_stock_suficiente",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": [
+      "relleno_oral",
+      "orden_alterado",
+      "cortesia_inicio_fin",
+      "sinonimo"
+    ]
+  },
+  {
+    "id": "ex_000004",
+    "grupo_id": "g_0002",
+    "split": "val",
+    "texto": "Hola, me mandás tres pizzas pepperoni y dos cocas, dale",
+    "intencion": "pedido",
+    "tokens": [
+      "Hola",
+      ",",
+      "me",
+      "mandás",
+      "tres",
+      "pizzas",
+      "pepperoni",
+      "y",
+      "dos",
+      "cocas",
+      ",",
+      "dale"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "I-PRODUCTO",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "pizzas pepperoni",
+          "producto_normalizado": "Pizza Pepperoni",
+          "cantidad": 3,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        },
+        {
+          "producto": "cocas",
+          "producto_normalizado": "Coca-Cola 500ml",
+          "cantidad": 2,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "3x Pizza Pepperoni, 2x Coca-Cola 500ml",
+    "escenario": "multi_item_stock_mezcla",
+    "dialecto": "rioplatense",
+    "tecnicas_lexicas": [
+      "regionalismo",
+      "numero_en_letras",
+      "cortesia_inicio_fin"
+    ]
+  },
+  {
+    "id": "ex_000005",
+    "grupo_id": "g_0002",
+    "split": "val",
+    "texto": "Che, 3 pepperoni y 2 cocas, porfa",
+    "intencion": "pedido",
+    "tokens": [
+      "Che",
+      ",",
+      "3",
+      "pepperoni",
+      "y",
+      "2",
+      "cocas",
+      ",",
+      "porfa"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "pepperoni",
+          "producto_normalizado": "Pizza Pepperoni",
+          "cantidad": 3,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        },
+        {
+          "producto": "cocas",
+          "producto_normalizado": "Coca-Cola 500ml",
+          "cantidad": 2,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "3x Pizza Pepperoni, 2x Coca-Cola 500ml",
+    "escenario": "multi_item_stock_mezcla",
+    "dialecto": "rioplatense",
+    "tecnicas_lexicas": [
+      "regionalismo",
+      "sinonimo",
+      "abreviatura"
+    ]
+  },
+  {
+    "id": "ex_000006",
+    "grupo_id": "g_0002",
+    "split": "val",
+    "texto": "Buenas, necesito tres pizza pepperoni y además dos gaseosas negras, gracias",
+    "intencion": "pedido",
+    "tokens": [
+      "Buenas",
+      ",",
+      "necesito",
+      "tres",
+      "pizza",
+      "pepperoni",
+      "y",
+      "además",
+      "dos",
+      "gaseosas",
+      "negras",
+      ",",
+      "gracias"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "I-PRODUCTO",
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "I-PRODUCTO",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "pizza pepperoni",
+          "producto_normalizado": "Pizza Pepperoni",
+          "cantidad": 3,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        },
+        {
+          "producto": "gaseosas negras",
+          "producto_normalizado": "Coca-Cola 500ml",
+          "cantidad": 2,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "3x Pizza Pepperoni, 2x Coca-Cola 500ml",
+    "escenario": "multi_item_stock_mezcla",
+    "dialecto": "rioplatense",
+    "tecnicas_lexicas": [
+      "sinonimo",
+      "numero_en_letras",
+      "orden_alterado",
+      "cortesia_inicio_fin"
+    ]
+  },
+  {
+    "id": "ex_000007",
+    "grupo_id": "g_0003",
+    "split": "train",
+    "texto": "Qué onda, me regalas dos porciones de alitas sin picante y cuatro chelas, gracias",
+    "intencion": "pedido",
+    "tokens": [
+      "Qué",
+      "onda",
+      ",",
+      "me",
+      "regalas",
+      "dos",
+      "porciones",
+      "de",
+      "alitas",
+      "sin",
+      "picante",
+      "y",
+      "cuatro",
+      "chelas",
+      ",",
+      "gracias"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-UNIDAD",
+      "O",
+      "B-PRODUCTO",
+      "B-NEGACION",
+      "B-EXCLUSION",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "alitas",
+          "producto_normalizado": "Alitas",
+          "cantidad": 2,
+          "unidad": "porción",
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [
+            "picante"
+          ],
+          "sustituciones": [],
+          "restricciones_globales": []
+        },
+        {
+          "producto": "chelas",
+          "producto_normalizado": "Cerveza",
+          "cantidad": 4,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "2x Alitas sin picante, 4x Cerveza",
+    "escenario": "multi_item_exclusion_stock_suficiente",
+    "dialecto": "mexicano",
+    "tecnicas_lexicas": [
+      "regionalismo",
+      "sinonimo",
+      "numero_en_letras",
+      "cortesia_inicio_fin"
+    ]
+  },
+  {
+    "id": "ex_000008",
+    "grupo_id": "g_0003",
+    "split": "train",
+    "texto": "Hola, 2 porciones de wings nada de picante y 4 birras xfa",
+    "intencion": "pedido",
+    "tokens": [
+      "Hola",
+      ",",
+      "2",
+      "porciones",
+      "de",
+      "wings",
+      "nada",
+      "de",
+      "picante",
+      "y",
+      "4",
+      "birras",
+      "xfa"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-UNIDAD",
+      "O",
+      "B-PRODUCTO",
+      "B-NEGACION",
+      "I-NEGACION",
+      "B-EXCLUSION",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "wings",
+          "producto_normalizado": "Alitas",
+          "cantidad": 2,
+          "unidad": "porción",
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [
+            "picante"
+          ],
+          "sustituciones": [],
+          "restricciones_globales": []
+        },
+        {
+          "producto": "birras",
+          "producto_normalizado": "Cerveza",
+          "cantidad": 4,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "2x Alitas sin picante, 4x Cerveza",
+    "escenario": "multi_item_exclusion_stock_suficiente",
+    "dialecto": "mexicano",
+    "tecnicas_lexicas": [
+      "sinonimo",
+      "abreviatura"
+    ]
+  },
+  {
+    "id": "ex_000009",
+    "grupo_id": "g_0003",
+    "split": "train",
+    "texto": "ORALE, dos porciones de alas sin picante y cuatro chelas nomás",
+    "intencion": "pedido",
+    "tokens": [
+      "ORALE",
+      ",",
+      "dos",
+      "porciones",
+      "de",
+      "alas",
+      "sin",
+      "picante",
+      "y",
+      "cuatro",
+      "chelas",
+      "nomás"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-UNIDAD",
+      "O",
+      "B-PRODUCTO",
+      "B-NEGACION",
+      "B-EXCLUSION",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "alas",
+          "producto_normalizado": "Alitas",
+          "cantidad": 2,
+          "unidad": "porción",
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [
+            "picante"
+          ],
+          "sustituciones": [],
+          "restricciones_globales": []
+        },
+        {
+          "producto": "chelas",
+          "producto_normalizado": "Cerveza",
+          "cantidad": 4,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "2x Alitas sin picante, 4x Cerveza",
+    "escenario": "multi_item_exclusion_stock_suficiente",
+    "dialecto": "mexicano",
+    "tecnicas_lexicas": [
+      "regionalismo",
+      "sinonimo",
+      "mayusculas_raras",
+      "sin_tilde",
+      "numero_en_letras"
+    ]
+  },
+  {
+    "id": "ex_000010",
+    "grupo_id": "g_0003",
+    "split": "train",
+    "texto": "Disculpe la molestia, ¿me podría dar dos porciones de alitas sin picante y 4 cervesas? Gracias",
+    "intencion": "pedido",
+    "tokens": [
+      "Disculpe",
+      "la",
+      "molestia",
+      ",",
+      "¿",
+      "me",
+      "podría",
+      "dar",
+      "dos",
+      "porciones",
+      "de",
+      "alitas",
+      "sin",
+      "picante",
+      "y",
+      "4",
+      "cervesas",
+      "?",
+      "Gracias"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-UNIDAD",
+      "O",
+      "B-PRODUCTO",
+      "B-NEGACION",
+      "B-EXCLUSION",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "alitas",
+          "producto_normalizado": "Alitas",
+          "cantidad": 2,
+          "unidad": "porción",
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [
+            "picante"
+          ],
+          "sustituciones": [],
+          "restricciones_globales": []
+        },
+        {
+          "producto": "cervesas",
+          "producto_normalizado": "Cerveza",
+          "cantidad": 4,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "2x Alitas sin picante, 4x Cerveza",
+    "escenario": "multi_item_exclusion_stock_suficiente",
+    "dialecto": "mexicano",
+    "tecnicas_lexicas": [
+      "error_tipeo",
+      "cortesia_inicio_fin",
+      "numero_en_letras"
+    ]
+  },
+  {
+    "id": "ex_000011",
+    "grupo_id": "g_0004",
+    "split": "train",
+    "texto": "Buenas tardes, regálame una hamburguesita nomás, por favor",
+    "intencion": "pedido",
+    "tokens": [
+      "Buenas",
+      "tardes",
+      ",",
+      "regálame",
+      "una",
+      "hamburguesita",
+      "nomás",
+      ",",
+      "por",
+      "favor"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "hamburguesita",
+          "producto_normalizado": "Hamburguesa Simple",
+          "cantidad": 1,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "1x Hamburguesa Simple",
+    "escenario": "simple_stock_suficiente",
+    "dialecto": "andino",
+    "tecnicas_lexicas": [
+      "regionalismo",
+      "sinonimo",
+      "cortesia_inicio_fin"
+    ]
+  },
+  {
+    "id": "ex_000012",
+    "grupo_id": "g_0005",
+    "split": "train",
+    "texto": "Hola, ¿tienen hamburguesa doble hoy?",
+    "intencion": "consulta",
+    "tokens": [
+      "Hola",
+      ",",
+      "¿",
+      "tienen",
+      "hamburguesa",
+      "doble",
+      "hoy",
+      "?"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "consulta",
+      "items": [],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "[CONSULTA]",
+    "escenario": "consulta_disponibilidad_producto_negativo_dificil",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": [
+      "cortesia_inicio_fin"
+    ]
+  },
+  {
+    "id": "ex_000013",
+    "grupo_id": "g_0006",
+    "split": "train",
+    "texto": "Hola, me das cinco aguitas pues",
+    "intencion": "pedido",
+    "tokens": [
+      "Hola",
+      ",",
+      "me",
+      "das",
+      "cinco",
+      "aguitas",
+      "pues"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "aguitas",
+          "producto_normalizado": "Agua 500ml",
+          "cantidad": 5,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "5x Agua 500ml",
+    "escenario": "simple_stock_parcial",
+    "dialecto": "andino",
+    "tecnicas_lexicas": [
+      "regionalismo",
+      "sin_tilde",
+      "numero_en_letras"
+    ]
+  },
+  {
+    "id": "ex_000014",
+    "grupo_id": "g_0007",
+    "split": "train",
+    "texto": "Mi pizza margarita llegó fría y tarde",
+    "intencion": "reclamo",
+    "tokens": [
+      "Mi",
+      "pizza",
+      "margarita",
+      "llegó",
+      "fría",
+      "y",
+      "tarde"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "reclamo",
+      "items": [],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "[RECLAMO]",
+    "escenario": "reclamo_producto_frio_negativo_dificil",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": []
+  },
+  {
+    "id": "ex_000015",
+    "grupo_id": "g_0008",
+    "split": "train",
+    "texto": "Buen día, me gustaría una pizza margarta, gracias",
+    "intencion": "pedido",
+    "tokens": [
+      "Buen",
+      "día",
+      ",",
+      "me",
+      "gustaría",
+      "una",
+      "pizza",
+      "margarta",
+      ",",
+      "gracias"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "I-PRODUCTO",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "pizza margarta",
+          "producto_normalizado": "Pizza Margarita",
+          "cantidad": 1,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "1x Pizza Margarita",
+    "escenario": "simple_stock_agotado",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": [
+      "error_tipeo",
+      "cortesia_inicio_fin"
+    ]
+  },
+  {
+    "id": "ex_000016",
+    "grupo_id": "g_0009",
+    "split": "train",
+    "texto": "Hola, buenos días a todos",
+    "intencion": "saludo_otro",
+    "tokens": [
+      "Hola",
+      ",",
+      "buenos",
+      "días",
+      "a",
+      "todos"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "saludo_otro",
+      "items": [],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "[SALUDO_OTRO]",
+    "escenario": "saludo_simple",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": [
+      "cortesia_inicio_fin"
+    ]
+  },
+  {
+    "id": "ex_000017",
+    "grupo_id": "g_0010",
+    "split": "train",
+    "texto": "Buenas, ponme tres brownies, gracias",
+    "intencion": "pedido",
+    "tokens": [
+      "Buenas",
+      ",",
+      "ponme",
+      "tres",
+      "brownies",
+      ",",
+      "gracias"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "brownies",
+          "producto_normalizado": "Brownie",
+          "cantidad": 3,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "3x Brownie",
+    "escenario": "simple_stock_igual",
+    "dialecto": "español_españa",
+    "tecnicas_lexicas": [
+      "regionalismo",
+      "numero_en_letras",
+      "cortesia_inicio_fin"
+    ]
+  },
+  {
+    "id": "ex_000018",
+    "grupo_id": "g_0011",
+    "split": "val",
+    "texto": "¿A qué hora cierran hoy?",
+    "intencion": "consulta",
+    "tokens": [
+      "¿",
+      "A",
+      "qué",
+      "hora",
+      "cierran",
+      "hoy",
+      "?"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "consulta",
+      "items": [],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "[CONSULTA]",
+    "escenario": "consulta_horario",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": []
+  },
+  {
+    "id": "ex_000019",
+    "grupo_id": "g_0012",
+    "split": "train",
+    "texto": "Hola, necesito 10 hamburguesas, gracias de antemano",
+    "intencion": "pedido",
+    "tokens": [
+      "Hola",
+      ",",
+      "necesito",
+      "10",
+      "hamburguesas",
+      ",",
+      "gracias",
+      "de",
+      "antemano"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "hamburguesas",
+          "producto_normalizado": "Hamburguesa Simple",
+          "cantidad": 10,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "10x Hamburguesa Simple",
+    "escenario": "simple_pedido_grande_stock_parcial",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": [
+      "cortesia_inicio_fin"
+    ]
+  },
+  {
+    "id": "ex_000020",
+    "grupo_id": "g_0013",
+    "split": "train",
+    "texto": "Oiga, las papas llegaron remojadas y faltó una cerveza",
+    "intencion": "reclamo",
+    "tokens": [
+      "Oiga",
+      ",",
+      "las",
+      "papas",
+      "llegaron",
+      "remojadas",
+      "y",
+      "faltó",
+      "una",
+      "cerveza"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "reclamo",
+      "items": [],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "[RECLAMO]",
+    "escenario": "reclamo_calidad_faltante_negativo_dificil",
+    "dialecto": "andino",
+    "tecnicas_lexicas": [
+      "regionalismo"
+    ]
+  },
+  {
+    "id": "ex_000021",
+    "grupo_id": "g_0014",
+    "split": "train",
+    "texto": "Regálame 2 hamburguesas dobles sin tomate ni cebolla, nomás",
+    "intencion": "pedido",
+    "tokens": [
+      "Regálame",
+      "2",
+      "hamburguesas",
+      "dobles",
+      "sin",
+      "tomate",
+      "ni",
+      "cebolla",
+      ",",
+      "nomás"
+    ],
+    "bio_tags": [
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "I-PRODUCTO",
+      "B-NEGACION",
+      "B-EXCLUSION",
+      "O",
+      "B-EXCLUSION",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "hamburguesas dobles",
+          "producto_normalizado": "Hamburguesa Doble",
+          "cantidad": 2,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [
+            "tomate",
+            "cebolla"
+          ],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "2x Hamburguesa Doble sin tomate y cebolla",
+    "escenario": "exclusion_multiple_stock_parcial",
+    "dialecto": "andino",
+    "tecnicas_lexicas": [
+      "regionalismo"
+    ]
+  },
+  {
+    "id": "ex_000022",
+    "grupo_id": "g_0015",
+    "split": "test",
+    "texto": "Gracias, buen servicio y muy rica la comida",
+    "intencion": "saludo_otro",
+    "tokens": [
+      "Gracias",
+      ",",
+      "buen",
+      "servicio",
+      "y",
+      "muy",
+      "rica",
+      "la",
+      "comida"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "saludo_otro",
+      "items": [],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "[SALUDO_OTRO]",
+    "escenario": "agradecimiento_felicitacion",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": []
+  },
+  {
+    "id": "ex_000023",
+    "grupo_id": "g_0016",
+    "split": "test",
+    "texto": "Dame 3 hamburguesas cero tomate y nada de mayonesa, por favor",
+    "intencion": "pedido",
+    "tokens": [
+      "Dame",
+      "3",
+      "hamburguesas",
+      "cero",
+      "tomate",
+      "y",
+      "nada",
+      "de",
+      "mayonesa",
+      ",",
+      "por",
+      "favor"
+    ],
+    "bio_tags": [
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "B-NEGACION",
+      "B-EXCLUSION",
+      "O",
+      "B-NEGACION",
+      "I-NEGACION",
+      "B-EXCLUSION",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "hamburguesas",
+          "producto_normalizado": "Hamburguesa Simple",
+          "cantidad": 3,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [
+            "tomate",
+            "mayonesa"
+          ],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "3x Hamburguesa Simple sin tomate y mayonesa",
+    "escenario": "exclusion_negaciones_variadas_stock_parcial",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": [
+      "cortesia_inicio_fin"
+    ]
+  },
+  {
+    "id": "ex_000024",
+    "grupo_id": "g_0017",
+    "split": "train",
+    "texto": "Oye, ¿cuánto cuesta la pizza pepperoni?",
+    "intencion": "consulta",
+    "tokens": [
+      "Oye",
+      ",",
+      "¿",
+      "cuánto",
+      "cuesta",
+      "la",
+      "pizza",
+      "pepperoni",
+      "?"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "consulta",
+      "items": [],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "[CONSULTA]",
+    "escenario": "consulta_precio_producto_negativo_dificil",
+    "dialecto": "andino",
+    "tecnicas_lexicas": []
+  },
+  {
+    "id": "ex_000025",
+    "grupo_id": "g_0018",
+    "split": "train",
+    "texto": "Quiero una hamburguesa con extra queso, tocino y bien cocida, por favor",
+    "intencion": "pedido",
+    "tokens": [
+      "Quiero",
+      "una",
+      "hamburguesa",
+      "con",
+      "extra",
+      "queso",
+      ",",
+      "tocino",
+      "y",
+      "bien",
+      "cocida",
+      ",",
+      "por",
+      "favor"
+    ],
+    "bio_tags": [
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "O",
+      "B-INGREDIENTE",
+      "I-INGREDIENTE",
+      "O",
+      "B-INGREDIENTE",
+      "O",
+      "B-MODIFICACION",
+      "I-MODIFICACION",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "hamburguesa",
+          "producto_normalizado": "Hamburguesa Simple",
+          "cantidad": 1,
+          "unidad": null,
+          "ingredientes": [
+            "extra queso",
+            "tocino"
+          ],
+          "modificaciones": [
+            "bien cocida"
+          ],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "1x Hamburguesa Simple con extra queso y tocino bien cocida",
+    "escenario": "modificaciones_ingredientes_stock_suficiente",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": [
+      "cortesia_inicio_fin"
+    ]
+  },
+  {
+    "id": "ex_000026",
+    "grupo_id": "g_0019",
+    "split": "test",
+    "texto": "Llevo una hora esperando mi pedido y nadie me responde",
+    "intencion": "reclamo",
+    "tokens": [
+      "Llevo",
+      "una",
+      "hora",
+      "esperando",
+      "mi",
+      "pedido",
+      "y",
+      "nadie",
+      "me",
+      "responde"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "reclamo",
+      "items": [],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "[RECLAMO]",
+    "escenario": "reclamo_demora",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": []
+  },
+  {
+    "id": "ex_000027",
+    "grupo_id": "g_0020",
+    "split": "train",
+    "texto": "Ponme una hamburguesa doble y cámbiame el tomate por lechuga, porfa",
+    "intencion": "pedido",
+    "tokens": [
+      "Ponme",
+      "una",
+      "hamburguesa",
+      "doble",
+      "y",
+      "cámbiame",
+      "el",
+      "tomate",
+      "por",
+      "lechuga",
+      ",",
+      "porfa"
+    ],
+    "bio_tags": [
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "I-PRODUCTO",
+      "O",
+      "O",
+      "O",
+      "B-SUST_DE",
+      "O",
+      "B-SUST_A",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "hamburguesa doble",
+          "producto_normalizado": "Hamburguesa Doble",
+          "cantidad": 1,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [
+            {
+              "de": "tomate",
+              "a": "lechuga"
+            }
+          ],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "1x Hamburguesa Doble cambio tomate por lechuga",
+    "escenario": "sustitucion_stock_agotado",
+    "dialecto": "español_españa",
+    "tecnicas_lexicas": [
+      "regionalismo",
+      "abreviatura"
+    ]
+  },
+  {
+    "id": "ex_000028",
+    "grupo_id": "g_0021",
+    "split": "train",
+    "texto": "¿Hacen entregas a domicilio por esta zona?",
+    "intencion": "consulta",
+    "tokens": [
+      "¿",
+      "Hacen",
+      "entregas",
+      "a",
+      "domicilio",
+      "por",
+      "esta",
+      "zona",
+      "?"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "consulta",
+      "items": [],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "[CONSULTA]",
+    "escenario": "consulta_delivery",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": []
+  },
+  {
+    "id": "ex_000029",
+    "grupo_id": "g_0022",
+    "split": "train",
+    "texto": "Hola, me das 4 papitas, 3 aros de cebolla y 2 helados nomás",
+    "intencion": "pedido",
+    "tokens": [
+      "Hola",
+      ",",
+      "me",
+      "das",
+      "4",
+      "papitas",
+      ",",
+      "3",
+      "aros",
+      "de",
+      "cebolla",
+      "y",
+      "2",
+      "helados",
+      "nomás"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "I-PRODUCTO",
+      "I-PRODUCTO",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "papitas",
+          "producto_normalizado": "Papas Fritas",
+          "cantidad": 4,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        },
+        {
+          "producto": "aros de cebolla",
+          "producto_normalizado": "Aros de Cebolla",
+          "cantidad": 3,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        },
+        {
+          "producto": "helados",
+          "producto_normalizado": "Helado",
+          "cantidad": 2,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "4x Papas Fritas, 3x Aros de Cebolla, 2x Helado",
+    "escenario": "multi_item_3_stock_parcial",
+    "dialecto": "andino",
+    "tecnicas_lexicas": [
+      "regionalismo",
+      "sinonimo"
+    ]
+  },
+  {
+    "id": "ex_000030",
+    "grupo_id": "g_0023",
+    "split": "train",
+    "texto": "Buenas noches, que tengan un lindo día",
+    "intencion": "saludo_otro",
+    "tokens": [
+      "Buenas",
+      "noches",
+      ",",
+      "que",
+      "tengan",
+      "un",
+      "lindo",
+      "día"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "saludo_otro",
+      "items": [],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "[SALUDO_OTRO]",
+    "escenario": "despedida_cortesia",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": [
+      "cortesia_inicio_fin"
+    ]
+  },
+  {
+    "id": "ex_000031",
+    "grupo_id": "g_0024",
+    "split": "test",
+    "texto": "Buenas noches, quisiera una pizza margarita, 2 alitas, 2 aguas y un brownie, gracias",
+    "intencion": "pedido",
+    "tokens": [
+      "Buenas",
+      "noches",
+      ",",
+      "quisiera",
+      "una",
+      "pizza",
+      "margarita",
+      ",",
+      "2",
+      "alitas",
+      ",",
+      "2",
+      "aguas",
+      "y",
+      "un",
+      "brownie",
+      ",",
+      "gracias"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "I-PRODUCTO",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "pizza margarita",
+          "producto_normalizado": "Pizza Margarita",
+          "cantidad": 1,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        },
+        {
+          "producto": "alitas",
+          "producto_normalizado": "Alitas",
+          "cantidad": 2,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        },
+        {
+          "producto": "aguas",
+          "producto_normalizado": "Agua 500ml",
+          "cantidad": 2,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        },
+        {
+          "producto": "brownie",
+          "producto_normalizado": "Brownie",
+          "cantidad": 1,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "1x Pizza Margarita, 2x Alitas, 2x Agua 500ml, 1x Brownie",
+    "escenario": "multi_item_4_stock_suficiente",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": [
+      "cortesia_inicio_fin",
+      "numero_en_letras"
+    ]
+  },
+  {
+    "id": "ex_000032",
+    "grupo_id": "g_0025",
+    "split": "train",
+    "texto": "La hamburguesa vino con cebolla y yo pedí sin cebolla, qué mal servicio",
+    "intencion": "reclamo",
+    "tokens": [
+      "La",
+      "hamburguesa",
+      "vino",
+      "con",
+      "cebolla",
+      "y",
+      "yo",
+      "pedí",
+      "sin",
+      "cebolla",
+      ",",
+      "qué",
+      "mal",
+      "servicio"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "reclamo",
+      "items": [],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "[RECLAMO]",
+    "escenario": "reclamo_error_pedido_negativo_dificil",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": []
+  },
+  {
+    "id": "ex_000033",
+    "grupo_id": "g_0026",
+    "split": "train",
+    "texto": "Hola, soy alérgico al huevo, quiero una pizza pepperoni, por favor",
+    "intencion": "pedido",
+    "tokens": [
+      "Hola",
+      ",",
+      "soy",
+      "alérgico",
+      "al",
+      "huevo",
+      ",",
+      "quiero",
+      "una",
+      "pizza",
+      "pepperoni",
+      ",",
+      "por",
+      "favor"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "B-NEGACION",
+      "I-NEGACION",
+      "B-EXCLUSION",
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "I-PRODUCTO",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "pizza pepperoni",
+          "producto_normalizado": "Pizza Pepperoni",
+          "cantidad": 1,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [
+        "sin huevo"
+      ],
+      "notas": []
+    },
+    "comanda": "1x Pizza Pepperoni; global: sin huevo",
+    "escenario": "restriccion_global_alergia_stock_agotado",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": [
+      "cortesia_inicio_fin"
+    ]
+  },
+  {
+    "id": "ex_000034",
+    "grupo_id": "g_0027",
+    "split": "train",
+    "texto": "Disculpe, ¿las alitas vienen con salsa picante o sin ella?",
+    "intencion": "consulta",
+    "tokens": [
+      "Disculpe",
+      ",",
+      "¿",
+      "las",
+      "alitas",
+      "vienen",
+      "con",
+      "salsa",
+      "picante",
+      "o",
+      "sin",
+      "ella",
+      "?"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "consulta",
+      "items": [],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "[CONSULTA]",
+    "escenario": "consulta_ingredientes_producto_negativo_dificil",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": [
+      "cortesia_inicio_fin"
+    ]
+  },
+  {
+    "id": "ex_000035",
+    "grupo_id": "g_0028",
+    "split": "train",
+    "texto": "Hola, mandame 2 porciones de alitas y 3 papas, todo sin picante, dale",
+    "intencion": "pedido",
+    "tokens": [
+      "Hola",
+      ",",
+      "mandame",
+      "2",
+      "porciones",
+      "de",
+      "alitas",
+      "y",
+      "3",
+      "papas",
+      ",",
+      "todo",
+      "sin",
+      "picante",
+      ",",
+      "dale"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-UNIDAD",
+      "O",
+      "B-PRODUCTO",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "O",
+      "O",
+      "B-NEGACION",
+      "B-EXCLUSION",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "alitas",
+          "producto_normalizado": "Alitas",
+          "cantidad": 2,
+          "unidad": "porción",
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        },
+        {
+          "producto": "papas",
+          "producto_normalizado": "Papas Fritas",
+          "cantidad": 3,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [
+        "sin picante"
+      ],
+      "notas": []
+    },
+    "comanda": "2x Alitas, 3x Papas Fritas; global: sin picante",
+    "escenario": "restriccion_global_stock_parcial",
+    "dialecto": "rioplatense",
+    "tecnicas_lexicas": [
+      "regionalismo",
+      "cortesia_inicio_fin"
+    ]
+  },
+  {
+    "id": "ex_000036",
+    "grupo_id": "g_0029",
+    "split": "train",
+    "texto": "Hola amigo, ¿cómo estás? Solo saludaba",
+    "intencion": "saludo_otro",
+    "tokens": [
+      "Hola",
+      "amigo",
+      ",",
+      "¿",
+      "cómo",
+      "estás",
+      "?",
+      "Solo",
+      "saludaba"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "saludo_otro",
+      "items": [],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "[SALUDO_OTRO]",
+    "escenario": "saludo_conversacional",
+    "dialecto": "andino",
+    "tecnicas_lexicas": [
+      "regionalismo"
+    ]
+  },
+  {
+    "id": "ex_000037",
+    "grupo_id": "g_0030",
+    "split": "train",
+    "texto": "Buenas tardes, disculpe la molestia, eh, este, quería pedir si fuera posible dos cervezas heladitas y una porción de papas fritas, o sea, sin sal nomás, muchas gracias por su atención",
+    "intencion": "pedido",
+    "tokens": [
+      "Buenas",
+      "tardes",
+      ",",
+      "disculpe",
+      "la",
+      "molestia",
+      ",",
+      "eh",
+      ",",
+      "este",
+      ",",
+      "quería",
+      "pedir",
+      "si",
+      "fuera",
+      "posible",
+      "dos",
+      "cervezas",
+      "heladitas",
+      "y",
+      "una",
+      "porción",
+      "de",
+      "papas",
+      "fritas",
+      ",",
+      "o",
+      "sea",
+      ",",
+      "sin",
+      "sal",
+      "nomás",
+      ",",
+      "muchas",
+      "gracias",
+      "por",
+      "su",
+      "atención"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "B-CANTIDAD",
+      "B-PRODUCTO",
+      "I-PRODUCTO",
+      "O",
+      "B-CANTIDAD",
+      "B-UNIDAD",
+      "O",
+      "B-PRODUCTO",
+      "I-PRODUCTO",
+      "O",
+      "O",
+      "O",
+      "O",
+      "B-NEGACION",
+      "B-EXCLUSION",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "pedido",
+      "items": [
+        {
+          "producto": "cervezas heladitas",
+          "producto_normalizado": "Cerveza",
+          "cantidad": 2,
+          "unidad": null,
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [],
+          "sustituciones": [],
+          "restricciones_globales": []
+        },
+        {
+          "producto": "papas fritas",
+          "producto_normalizado": "Papas Fritas",
+          "cantidad": 1,
+          "unidad": "porción",
+          "ingredientes": [],
+          "modificaciones": [],
+          "exclusiones": [
+            "sal"
+          ],
+          "sustituciones": [],
+          "restricciones_globales": []
+        }
+      ],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "2x Cerveza, 1x Papas Fritas sin sal",
+    "escenario": "pedido_largo_cortesia_ruido",
+    "dialecto": "andino",
+    "tecnicas_lexicas": [
+      "cortesia_inicio_fin",
+      "relleno_oral",
+      "regionalismo",
+      "sinonimo",
+      "numero_en_letras"
+    ]
+  },
+  {
+    "id": "ex_000038",
+    "grupo_id": "g_0031",
+    "split": "train",
+    "texto": "El pedido llegó incompleto y me cobraron de más",
+    "intencion": "reclamo",
+    "tokens": [
+      "El",
+      "pedido",
+      "llegó",
+      "incompleto",
+      "y",
+      "me",
+      "cobraron",
+      "de",
+      "más"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "reclamo",
+      "items": [],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "[RECLAMO]",
+    "escenario": "reclamo_cobro_pedido_incompleto",
+    "dialecto": "español_españa",
+    "tecnicas_lexicas": []
+  },
+  {
+    "id": "ex_000039",
+    "grupo_id": "g_0032",
+    "split": "train",
+    "texto": "¿Aceptáis pago con tarjeta o solo efectivo?",
+    "intencion": "consulta",
+    "tokens": [
+      "¿",
+      "Aceptáis",
+      "pago",
+      "con",
+      "tarjeta",
+      "o",
+      "solo",
+      "efectivo",
+      "?"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "consulta",
+      "items": [],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "[CONSULTA]",
+    "escenario": "consulta_medios_pago",
+    "dialecto": "español_españa",
+    "tecnicas_lexicas": [
+      "regionalismo"
+    ]
+  },
+  {
+    "id": "ex_000040",
+    "grupo_id": "g_0033",
+    "split": "train",
+    "texto": "Disculpa, me equivoqué de número, perdón",
+    "intencion": "saludo_otro",
+    "tokens": [
+      "Disculpa",
+      ",",
+      "me",
+      "equivoqué",
+      "de",
+      "número",
+      ",",
+      "perdón"
+    ],
+    "bio_tags": [
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O",
+      "O"
+    ],
+    "contrato_json": {
+      "intencion": "saludo_otro",
+      "items": [],
+      "restricciones_globales": [],
+      "notas": []
+    },
+    "comanda": "[SALUDO_OTRO]",
+    "escenario": "otro_mensaje_equivocado",
+    "dialecto": "neutro",
+    "tecnicas_lexicas": [
+      "cortesia_inicio_fin"
+    ]
+  }
+]

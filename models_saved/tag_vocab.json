@@ -1,0 +1,23 @@
+{
+  "tag2id": {
+    "<PAD>": 0,
+    "O": 1,
+    "B-CANTIDAD": 2,
+    "B-UNIDAD": 3,
+    "B-PRODUCTO": 4,
+    "I-PRODUCTO": 5,
+    "B-NEGACION": 6,
+    "B-EXCLUSION": 7,
+    "I-EXCLUSION": 8,
+    "B-SUST_DE": 9,
+    "B-SUST_A": 10,
+    "B-MODIFICACION": 11,
+    "B-INGREDIENTE": 12,
+    "I-INGREDIENTE": 13,
+    "I-NEGACION": 14,
+    "I-MODIFICACION": 15,
+    "I-SUST_DE": 16,
+    "I-SUST_A": 17
+  },
+  "pad_tag": "<PAD>"
+}

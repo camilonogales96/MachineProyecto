@@ -1,7 +1,7 @@
 """
-Generador de dataset sintético con Data Augmentation para pedidos de restaurante.
-Genera pares: (Texto libre con cortesías/ruido, Intención, Tokens BIO para NER, Contrato JSON).
-Completamente autónomo, sin modelos pre-entrenados ni APIs externas.
+Generador de dataset enriquecido con dialectos, cortesías, exclusiones y sustituciones (SUST_DE, SUST_A).
+Integra el Gold Standard (dataset_pedidos_lote1.csv) para producir conjuntos balanceados:
+train.json, val.json, test.json.
 """
 
 import os
@@ -10,7 +10,6 @@ import json
 import random
 from typing import List, Dict, Any, Tuple
 
-# Asegurar import de tokenizer local
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 if project_root not in sys.path:
@@ -18,55 +17,30 @@ if project_root not in sys.path:
 
 from src.preprocessing.tokenizer import SimpleSpanishTokenizer
 
-CORTESIAS_INICIO = [
-    "Hola",
-    "Hola buenas tardes",
-    "Buenas noches",
-    "Buen día",
-    "Buenas",
-    "Hola estimado",
-    "Disculpe la molestia",
-    "Hola disculpe una pregunta",
-    "Buenas tardes disculpe la molestia",
-    "Hola qué tal",
-    "Oiga buenas",
-    "Por favor",
-    "Hola amigo",
-    "Buenas noches estimado",
-    ""
-]
+# Variaciones dialectales y cortesías
+CORTESIAS_INICIO_DIALECTOS = {
+    "neutro": ["Hola", "Hola buenas tardes", "Buenas noches", "Buen día", "Buenas", "Por favor", ""],
+    "rioplatense": ["Buenas", "Hola che", "Buenas noches", "Hola cómo va", "Che buenas", ""],
+    "mexicano": ["Hola qué tal", "Buenas tardes", "Hola oigan", "Qué onda buenas", "Hola plis", ""],
+    "andino": ["Hola buenas tardes", "Buen día por favor", "Buenas noches disculpe la molestia", "Hola caserito buenas", ""],
+    "español_españa": ["Buenas", "Hola buenas", "Hola majos", "Buenas tardes", ""]
+}
 
-VERBOS_PEDIDO = [
-    "quisiera pedir",
-    "me gustaría pedir",
-    "quiero pedir",
-    "voy a querer",
-    "deme",
-    "me trae",
-    "mándeme",
-    "mandame",
-    "deseo ordenar",
-    "para ordenar",
-    "anóteme",
-    "anotame",
-    "me envía",
-    "quisiera",
-    "me da",
-    "serían"
-]
+VERBOS_PEDIDO_DIALECTOS = {
+    "neutro": ["quisiera pedir", "me gustaría pedir", "quiero pedir", "voy a querer", "para ordenar", "deseo pedir"],
+    "rioplatense": ["poneme", "me traés", "me mandás", "voy a querer", "anotame", "quisiera pedir"],
+    "mexicano": ["me das", "me preparas", "voy a querer", "me pones", "quisiera", "para pedir"],
+    "andino": ["deme por favor", "me sirve", "anóteme", "quisiera pedirme", "me da"],
+    "español_españa": ["ponme", "me pones", "nos pones", "marcha", "quisiera pedir"]
+}
 
-CORTESIAS_FIN = [
-    "por favor",
-    "por favorcito",
-    "muchas gracias",
-    "gracias de antemano",
-    "se lo agradecería",
-    "porfa",
-    "eso sería todo gracias",
-    "y nada más gracias",
-    "mil gracias",
-    ""
-]
+CORTESIAS_FIN_DIALECTOS = {
+    "neutro": ["por favor", "muchas gracias", "gracias de antemano", "porfa", ""],
+    "rioplatense": ["porfa", "gracias che", "joya gracias", "de diez gracias", ""],
+    "mexicano": ["porfa", "plis", "muchas gracias", "sale gracias", ""],
+    "andino": ["por favorcito", "muchas gracias", "se lo agradecería", "Dios se lo pague", ""],
+    "español_españa": ["porfa", "gracias", "muchas gracias", "vale gracias", ""]
+}
 
 PREGUNTAS_CONSULTA = [
     ("¿A qué hora cierran hoy?", "consulta"),
@@ -102,13 +76,12 @@ TEXTOS_SALUDO_OTRO = [
 ]
 
 
-class OrderDatasetGenerator:
+class EnhancedOrderDatasetGenerator:
     def __init__(self, ontology_path: str):
         with open(ontology_path, "r", encoding="utf-8") as f:
             self.ontology = json.load(f)
         self.tokenizer = SimpleSpanishTokenizer()
         
-        # Consolidar todos los productos y variantes
         self.productos_flat = []
         for cat, items in self.ontology["categorias"].items():
             for item in items:
@@ -120,48 +93,18 @@ class OrderDatasetGenerator:
         self.cantidades = list(self.ontology["cantidades_lexicas"].keys())
         self.unidades = self.ontology["unidades"]
 
-    def _generar_item_pedido(self) -> Tuple[str, Dict[str, Any], List[Tuple[str, str]]]:
-        """
-        Genera un componente de pedido con etiquetas explícitas.
-        Retorna:
-          - Texto del segmento
-          - Dict del item (contrato JSON)
-          - Lista de tuplas (palabra/frase, tag_entidad) para BIO tagging preciso
-        """
+    def _generar_item(self, dialecto: str) -> Tuple[str, Dict[str, Any], List[Tuple[str, str]]]:
         prod_obj = random.choice(self.productos_flat)
         prod_nombre_oral = random.choice(prod_obj["sinonimos"])
         
-        # Cantidad
         cant_str = random.choice(self.cantidades)
         cant_num = self.ontology["cantidades_lexicas"][cant_str]
         
-        # Opcional unidad (ej: 1 "porción de" papas)
-        usar_unidad = random.random() < 0.25
+        usar_unidad = random.random() < 0.20
         unidad_str = random.choice(self.unidades) if usar_unidad else None
         
-        # Opcional exclusión (ej: sin cebolla)
-        usar_exclusion = random.random() < 0.4
-        exclusion_ingrediente = None
-        exclusion_marcador = None
-        if usar_exclusion:
-            exclusion_ingrediente = random.choice(self.ingredientes)
-            exclusion_marcador = random.choice(self.exclusiones)
-
-        # Opcional adición / modificación (ej: con extra queso, con doble carne)
-        usar_adicion = random.random() < 0.35
-        adicion_ingrediente = None
-        adicion_marcador = None
-        if usar_adicion:
-            adicion_ingrediente = random.choice(self.ingredientes)
-            adicion_marcador = random.choice(self.adiciones)
-
-        # Construir frase del item y registrar spans anotados
-        componentes = []
-        spans_anotados = []  # (texto, tag)
-        
-        # Cantidad
-        componentes.append(cant_str)
-        spans_anotados.append((cant_str, "CANTIDAD"))
+        componentes = [cant_str]
+        spans_anotados = [(cant_str, "CANTIDAD")]
         
         if unidad_str:
             componentes.append(unidad_str)
@@ -169,37 +112,47 @@ class OrderDatasetGenerator:
             if random.random() < 0.6:
                 componentes.append("de")
                 
-        # Producto
         componentes.append(prod_nombre_oral)
         spans_anotados.append((prod_nombre_oral, "PRODUCTO"))
         
         exclusiones_list = []
         ingredientes_extra_list = []
+        sustituciones_list = []
         
-        # Exclusión / Adición en orden aleatorio
-        modificadores = []
-        if usar_exclusion and exclusion_marcador and exclusion_ingrediente:
-            frase_exc = f"{exclusion_marcador} {exclusion_ingrediente}"
-            modificadores.append(("exc", exclusion_marcador, exclusion_ingrediente, frase_exc))
-            exclusiones_list.append(exclusion_ingrediente)
+        # Posibilidad de Exclusión (35%)
+        if random.random() < 0.35:
+            ing_exc = random.choice(self.ingredientes)
+            marc_exc = random.choice(self.exclusiones)
+            componentes.append(marc_exc)
+            spans_anotados.append((marc_exc, "NEGACION"))
+            componentes.append(ing_exc)
+            spans_anotados.append((ing_exc, "EXCLUSION"))
+            exclusiones_list.append(ing_exc)
             
-        if usar_adicion and adicion_marcador and adicion_ingrediente:
-            frase_add = f"{adicion_marcador} {adicion_ingrediente}"
-            modificadores.append(("add", adicion_marcador, adicion_ingrediente, frase_add))
-            ingredientes_extra_list.append(adicion_ingrediente)
+        # Posibilidad de Adición / Modificación (30%)
+        if random.random() < 0.30:
+            ing_add = random.choice(self.ingredientes)
+            marc_add = random.choice(self.adiciones)
+            componentes.append(marc_add)
+            spans_anotados.append((marc_add, "MODIFICACION"))
+            componentes.append(ing_add)
+            spans_anotados.append((ing_add, "INGREDIENTE"))
+            ingredientes_extra_list.append(ing_add)
+
+        # Posibilidad de Sustitución (15%) -> ej: cámbiame el tomate por lechuga
+        if random.random() < 0.15:
+            ing_de = random.choice(self.ingredientes)
+            ing_a = random.choice([x for x in self.ingredientes if x != ing_de])
+            marc_sust = random.choice(["cambiando el", "cámbiame el", "cambiando", "en vez de", "cambiar"])
+            conector_a = random.choice(["por", "por favor por"])
             
-        random.shuffle(modificadores)
-        for tipo, marcador, ing, frase in modificadores:
-            if tipo == "exc":
-                componentes.append(marcador)
-                spans_anotados.append((marcador, "NEGACION"))
-                componentes.append(ing)
-                spans_anotados.append((ing, "EXCLUSION"))
-            else:
-                componentes.append(marcador)
-                spans_anotados.append((marcador, "MODIFICACION"))
-                componentes.append(ing)
-                spans_anotados.append((ing, "INGREDIENTE"))
+            componentes.append(marc_sust)
+            componentes.append(ing_de)
+            spans_anotados.append((ing_de, "SUST_DE"))
+            componentes.append(conector_a)
+            componentes.append(ing_a)
+            spans_anotados.append((ing_a, "SUST_A"))
+            sustituciones_list.append({"de": ing_de, "a": ing_a})
 
         item_json = {
             "producto": prod_nombre_oral,
@@ -209,192 +162,161 @@ class OrderDatasetGenerator:
             "ingredientes": ingredientes_extra_list,
             "modificaciones": [],
             "exclusiones": exclusiones_list,
-            "sustituciones": []
+            "sustituciones": sustituciones_list
         }
-        
-        item_text = " ".join(componentes)
-        return item_text, item_json, spans_anotados
+        return " ".join(componentes), item_json, spans_anotados
 
-    def generar_ejemplo_pedido(self) -> Dict[str, Any]:
-        """Genera un pedido completo con 1 a 3 items y cortesías."""
+    def generar_ejemplo_pedido(self, dialecto: str = "neutro") -> Dict[str, Any]:
         num_items = random.choices([1, 2, 3], weights=[0.55, 0.35, 0.10])[0]
         
-        cortesia_ini = random.choice(CORTESIAS_INICIO)
-        verbo = random.choice(VERBOS_PEDIDO)
-        cortesia_fin = random.choice(CORTESIAS_FIN)
+        cortesia_ini = random.choice(CORTESIAS_INICIO_DIALECTOS[dialecto])
+        verbo = random.choice(VERBOS_PEDIDO_DIALECTOS[dialecto])
+        cortesia_fin = random.choice(CORTESIAS_FIN_DIALECTOS[dialecto])
         
         items_texts = []
         items_json = []
         all_spans = []
         
         for _ in range(num_items):
-            txt, j_item, spans = self._generar_item_pedido()
+            txt, j_item, spans = self._generar_item(dialecto)
             items_texts.append(txt)
             items_json.append(j_item)
             all_spans.extend(spans)
             
-        # Unir items con conectores naturales
-        conectores = [", y también ", ", con ", " y ", ", más "]
-        cuerpo_pedido = ""
-        for i, it_txt in enumerate(items_texts):
-            if i == 0:
-                cuerpo_pedido = it_txt
-            else:
-                conector = random.choice(conectores)
-                cuerpo_pedido += conector + it_txt
-                
-        partes = []
-        if cortesia_ini:
-            partes.append(cortesia_ini)
-        if verbo:
-            partes.append(verbo)
-        partes.append(cuerpo_pedido)
-        if cortesia_fin:
-            partes.append(cortesia_fin)
+        conectores = [", y también ", ", con ", " y ", ", más ", ", además de "]
+        cuerpo = items_texts[0]
+        for it_txt in items_texts[1:]:
+            cuerpo += random.choice(conectores) + it_txt
             
-        texto_completo = " ".join(p for p in partes if p).strip()
-        # Normalizar espacios
-        texto_completo = " ".join(texto_completo.split())
+        partes = [p for p in [cortesia_ini, verbo, cuerpo, cortesia_fin] if p]
+        texto = " ".join(" ".join(partes).split())
         
-        # Etiquetado BIO a nivel token
-        tokens = self.tokenizer.tokenize(texto_completo)
-        bio_tags = self._asignar_bio_tags(texto_completo, tokens, all_spans)
+        tokens = self.tokenizer.tokenize(texto)
+        bio_tags = self._asignar_bio_tags(tokens, all_spans)
         
-        # Resumen limpio (línea para cocina)
-        resumen_partes = []
+        # Comanda limpia
+        comanda_partes = []
         for it in items_json:
             p_desc = f"{it['cantidad']}x {it['producto_normalizado']}"
             if it["exclusiones"]:
                 p_desc += f" sin {', '.join(it['exclusiones'])}"
             if it["ingredientes"]:
                 p_desc += f" con extra {', '.join(it['ingredientes'])}"
-            resumen_partes.append(p_desc)
-        resumen_cocina = ", ".join(resumen_partes)
+            if it["sustituciones"]:
+                for s in it["sustituciones"]:
+                    p_desc += f" (cambio {s['de']} por {s['a']})"
+            comanda_partes.append(p_desc)
+        comanda = ", ".join(comanda_partes)
 
-        contrato_json = {
+        contrato = {
             "intencion": "pedido",
             "items": items_json,
             "restricciones_globales": [],
-            "notas": [],
-            "resumen_cocina": resumen_cocina
+            "notas": []
         }
         
         return {
-            "texto": texto_completo,
+            "texto": texto,
             "tokens": tokens,
             "bio_tags": bio_tags,
             "intencion": "pedido",
-            "contrato_json": contrato_json
+            "contrato_json": contrato,
+            "comanda": comanda,
+            "dialecto": dialecto
         }
 
-    def _asignar_bio_tags(self, texto: str, tokens: List[str], spans_anotados: List[Tuple[str, str]]) -> List[str]:
-        """Alinea los spans anotados a los tokens para generar tags BIO."""
+    def _asignar_bio_tags(self, tokens: List[str], spans_anotados: List[Tuple[str, str]]) -> List[str]:
         bio_tags = ["O"] * len(tokens)
-        
-        # Ordenar spans por longitud descendente para evitar colisiones
         spans_anotados.sort(key=lambda x: len(x[0]), reverse=True)
         
-        # Buscar cada span en el texto y proyectar sobre tokens
         for frase, tag in spans_anotados:
-            frase_tokens = self.tokenizer.tokenize(frase)
-            if not frase_tokens:
+            frase_toks = self.tokenizer.tokenize(frase)
+            if not frase_toks:
                 continue
-            
-            # Buscar ocurrencia de frase_tokens en tokens
-            m = len(frase_tokens)
+            m = len(frase_toks)
             for i in range(len(tokens) - m + 1):
-                if tokens[i:i+m] == frase_tokens:
-                    # Verificar si ya está anotado
+                if tokens[i:i+m] == frase_toks:
                     if all(bio_tags[i+k] == "O" for k in range(m)):
                         bio_tags[i] = f"B-{tag}"
                         for k in range(1, m):
                             bio_tags[i+k] = f"I-{tag}"
-                            
         return bio_tags
 
-    def generar_dataset(self, n_pedidos: int = 2000, n_otros: int = 500) -> List[Dict[str, Any]]:
-        """Genera el dataset completo balanceado con pedidos y clases de control."""
-        dataset = []
+    def build_full_dataset(self, gold_seed_path: str, n_synthetic: int = 2500) -> Tuple[List[Dict], List[Dict], List[Dict]]:
+        """Combina datos sintéticos aumentados con el Gold Seed de dataset_pedidos_lote1.csv."""
+        # 1. Cargar Gold Seed
+        gold_train = []
+        gold_val = []
+        gold_test = []
+        if os.path.exists(gold_seed_path):
+            with open(gold_seed_path, "r", encoding="utf-8") as f:
+                gold_data = json.load(f)
+            for g in gold_data:
+                sp = g.get("split", "train")
+                if sp == "val":
+                    gold_val.append(g)
+                elif sp == "test":
+                    gold_test.append(g)
+                else:
+                    gold_train.append(g)
+
+        print(f"Gold Seed cargado: {len(gold_train)} train, {len(gold_val)} val, {len(gold_test)} test")
+
+        # 2. Generar datos sintéticos multi-dialecto
+        dialectos = ["neutro", "rioplatense", "mexicano", "andino", "español_españa"]
+        synthetic = []
         
-        # 1. Pedidos (Etapa 1: 'pedido', Etapa 2: NER + JSON)
+        n_pedidos = int(n_synthetic * 0.75)
+        n_otros = n_synthetic - n_pedidos
+        
         for _ in range(n_pedidos):
-            dataset.append(self.generar_ejemplo_pedido())
+            dial = random.choice(dialectos)
+            synthetic.append(self.generar_ejemplo_pedido(dialecto=dial))
             
-        # 2. Consultas
         for _ in range(n_otros // 3):
-            preg, intencion = random.choice(PREGUNTAS_CONSULTA)
-            # Agregar variación leve
-            saludo = random.choice(CORTESIAS_INICIO)
-            txt = f"{saludo} {preg}".strip() if saludo else preg
-            tokens = self.tokenizer.tokenize(txt)
-            dataset.append({
-                "texto": txt,
-                "tokens": tokens,
-                "bio_tags": ["O"] * len(tokens),
-                "intencion": intencion,
-                "contrato_json": {"intencion": intencion, "items": []}
-            })
-            
-        # 3. Reclamos
+            p, intent = random.choice(PREGUNTAS_CONSULTA)
+            toks = self.tokenizer.tokenize(p)
+            synthetic.append({"texto": p, "tokens": toks, "bio_tags": ["O"]*len(toks), "intencion": intent,
+                              "contrato_json": {"intencion": intent, "items": []}, "comanda": f"[{intent.upper()}]", "dialecto": "neutro"})
+
         for _ in range(n_otros // 3):
-            rec, intencion = random.choice(TEXTOS_RECLAMO)
-            saludo = random.choice(CORTESIAS_INICIO)
-            txt = f"{saludo} {rec}".strip() if saludo else rec
-            tokens = self.tokenizer.tokenize(txt)
-            dataset.append({
-                "texto": txt,
-                "tokens": tokens,
-                "bio_tags": ["O"] * len(tokens),
-                "intencion": intencion,
-                "contrato_json": {"intencion": intencion, "items": []}
-            })
-            
-        # 4. Saludo / Otro
+            p, intent = random.choice(TEXTOS_RECLAMO)
+            toks = self.tokenizer.tokenize(p)
+            synthetic.append({"texto": p, "tokens": toks, "bio_tags": ["O"]*len(toks), "intencion": intent,
+                              "contrato_json": {"intencion": intent, "items": []}, "comanda": f"[{intent.upper()}]", "dialecto": "neutro"})
+
         for _ in range(n_otros // 3):
-            sal, intencion = random.choice(TEXTOS_SALUDO_OTRO)
-            tokens = self.tokenizer.tokenize(sal)
-            dataset.append({
-                "texto": sal,
-                "tokens": tokens,
-                "bio_tags": ["O"] * len(tokens),
-                "intencion": intencion,
-                "contrato_json": {"intencion": intencion, "items": []}
-            })
-            
-        random.shuffle(dataset)
-        return dataset
+            p, intent = random.choice(TEXTOS_SALUDO_OTRO)
+            toks = self.tokenizer.tokenize(p)
+            synthetic.append({"texto": p, "tokens": toks, "bio_tags": ["O"]*len(toks), "intencion": intent,
+                              "contrato_json": {"intencion": intent, "items": []}, "comanda": f"[{intent.upper()}]", "dialecto": "neutro"})
+
+        random.shuffle(synthetic)
+        
+        n_syn_train = int(len(synthetic) * 0.70)
+        n_syn_val = int(len(synthetic) * 0.15)
+        
+        full_train = gold_train + synthetic[:n_syn_train]
+        full_val = gold_val + synthetic[n_syn_train:n_syn_train + n_syn_val]
+        full_test = gold_test + synthetic[n_syn_train + n_syn_val:]
+        
+        random.shuffle(full_train)
+        random.shuffle(full_val)
+        random.shuffle(full_test)
+        
+        return full_train, full_val, full_test
 
 
 if __name__ == "__main__":
     ontology_file = os.path.join(current_dir, "menu_ontology.json")
-    generator = OrderDatasetGenerator(ontology_file)
+    gold_file = os.path.join(current_dir, "dataset", "gold_seed_cleaned.json")
+    generator = EnhancedOrderDatasetGenerator(ontology_file)
     
-    print("Generando dataset...")
-    data = generator.generar_dataset(n_pedidos=2000, n_otros=600)
-    print(f"Total ejemplos generados: {len(data)}")
-    
-    # Split train (70%), val (15%), test (15%)
-    n_total = len(data)
-    n_train = int(n_total * 0.70)
-    n_val = int(n_total * 0.15)
-    
-    train_data = data[:n_train]
-    val_data = data[n_train:n_train + n_val]
-    test_data = data[n_train + n_val:]
-    
+    train, val, test = generator.build_full_dataset(gold_file, n_synthetic=2500)
     dataset_dir = os.path.join(current_dir, "dataset")
-    os.makedirs(dataset_dir, exist_ok=True)
     
-    for split_name, split_data in [("train.json", train_data), ("val.json", val_data), ("test.json", test_data)]:
-        out_path = os.path.join(dataset_dir, split_name)
-        with open(out_path, "w", encoding="utf-8") as f:
-            json.dump(split_data, f, ensure_ascii=False, indent=2)
-        print(f"Guardado {split_name}: {len(split_data)} ejemplos en {out_path}")
-
-    # Mostrar ejemplo
-    print("\n--- EJEMPLO MUESTRA ---")
-    ej = train_data[0]
-    print("Texto:", ej["texto"])
-    print("Intención:", ej["intencion"])
-    print("Tokens/BIO:", list(zip(ej["tokens"], ej["bio_tags"]))[:15])
-    print("JSON:", json.dumps(ej["contrato_json"], ensure_ascii=False, indent=2))
+    for fname, data in [("train.json", train), ("val.json", val), ("test.json", test)]:
+        out = os.path.join(dataset_dir, fname)
+        with open(out, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        print(f"Generado {fname}: {len(data)} ejemplos guardados en {out}")
