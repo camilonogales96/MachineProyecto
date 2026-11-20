@@ -1,0 +1,179 @@
+{
+  "categorias": {
+    "hamburguesas": [
+      {
+        "id": "hamb_simple",
+        "nombre": "Hamburguesa Simple",
+        "sinonimos": ["hamburguesa", "hamburguesa simple", "burger", "hamburguesa clásica", "clasica", "simple"],
+        "ingredientes_base": ["carne", "lechuga", "tomate", "cebolla", "mayonesa", "ketchup"],
+        "precio": 5.0
+      },
+      {
+        "id": "hamb_doble",
+        "nombre": "Hamburguesa Doble",
+        "sinonimos": ["hamburguesa doble", "doble burger", "burger doble", "hamburguesa con doble carne", "doble carne"],
+        "ingredientes_base": ["doble carne", "lechuga", "tomate", "cebolla", "queso", "mayonesa", "ketchup"],
+        "precio": 7.5
+      },
+      {
+        "id": "hamb_queso",
+        "nombre": "Cheeseburger",
+        "sinonimos": ["cheeseburger", "hamburguesa con queso", "hamburguesa de queso", "burger con queso"],
+        "ingredientes_base": ["carne", "queso cheddar", "pepinillos", "ketchup", "mostaza"],
+        "precio": 6.0
+      },
+      {
+        "id": "hamb_especial",
+        "nombre": "Hamburguesa Especial",
+        "sinonimos": ["hamburguesa especial", "burger especial", "la especial", "hamburguesa completa"],
+        "ingredientes_base": ["carne", "queso", "tocino", "huevo frito", "lechuga", "tomate", "cebolla caramelizada", "salsa de la casa"],
+        "precio": 8.5
+      }
+    ],
+    "acompanamientos": [
+      {
+        "id": "papas_fritas",
+        "nombre": "Papas Fritas",
+        "sinonimos": ["papas", "papas fritas", "patatas", "patatas fritas", "papas regulares", "porción de papas"],
+        "ingredientes_base": ["papas", "sal"],
+        "precio": 2.5
+      },
+      {
+        "id": "papas_rusticas",
+        "nombre": "Papas Rústicas",
+        "sinonimos": ["papas rusticas", "patatas rusticas", "papas al horno", "papas especiadas"],
+        "ingredientes_base": ["papas", "romero", "pimentón"],
+        "precio": 3.0
+      },
+      {
+        "id": "aros_cebolla",
+        "nombre": "Aros de Cebolla",
+        "sinonimos": ["aros de cebolla", "anillos de cebolla", "aros"],
+        "ingredientes_base": ["cebolla", "rebozado"],
+        "precio": 3.0
+      },
+      {
+        "id": "nuggets",
+        "nombre": "Nuggets de Pollo",
+        "sinonimos": ["nuggets", "nuggets de pollo", "trocitos de pollo"],
+        "ingredientes_base": ["pollo", "apanado"],
+        "precio": 3.5
+      }
+    ],
+    "bebidas": [
+      {
+        "id": "coca_cola",
+        "nombre": "Coca Cola",
+        "sinonimos": ["coca cola", "coca", "coca-cola", "coca zero", "coca light"],
+        "ingredientes_base": ["refresco"],
+        "precio": 2.0
+      },
+      {
+        "id": "fanta",
+        "nombre": "Fanta",
+        "sinonimos": ["fanta", "fanta naranja", "refresco de naranja"],
+        "ingredientes_base": ["refresco"],
+        "precio": 2.0
+      },
+      {
+        "id": "sprite",
+        "nombre": "Sprite",
+        "sinonimos": ["sprite", "refresco lima limon"],
+        "ingredientes_base": ["refresco"],
+        "precio": 2.0
+      },
+      {
+        "id": "agua_mineral",
+        "nombre": "Agua Mineral",
+        "sinonimos": ["agua", "agua mineral", "agua sin gas", "agua con gas", "botella de agua"],
+        "ingredientes_base": ["agua"],
+        "precio": 1.5
+      },
+      {
+        "id": "cerveza",
+        "nombre": "Cerveza",
+        "sinonimos": ["cerveza", "birra", "chela", "lata de cerveza"],
+        "ingredientes_base": ["cerveza"],
+        "precio": 3.0
+      }
+    ]
+  },
+  "ingredientes_modificables": [
+    "cebolla",
+    "cebolla caramelizada",
+    "tomate",
+    "lechuga",
+    "pepinillos",
+    "queso",
+    "queso cheddar",
+    "tocino",
+    "bacon",
+    "huevo frito",
+    "huevo",
+    "mayonesa",
+    "ketchup",
+    "mostaza",
+    "salsa picante",
+    "picante",
+    "salsa barbacoa",
+    "bbq",
+    "hielo",
+    "sal"
+  ],
+  "marcadores_exclusion": [
+    "sin",
+    "nada de",
+    "cero",
+    "quitar",
+    "quítale",
+    "quitale",
+    "sin nada de",
+    "no le pongas",
+    "no poner",
+    "pero sin",
+    "menos"
+  ],
+  "marcadores_adicion": [
+    "con",
+    "con extra",
+    "extra",
+    "agregale",
+    "agrégale",
+    "doble",
+    "adicional de",
+    "más",
+    "mas"
+  ],
+  "cantidades_lexicas": {
+    "un": 1,
+    "uno": 1,
+    "una": 1,
+    "dos": 2,
+    "tres": 3,
+    "cuatro": 4,
+    "cinco": 5,
+    "seis": 6,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6
+  },
+  "unidades": [
+    "porción",
+    "porcion",
+    "porciones",
+    "orden",
+    "órdenes",
+    "ordenes",
+    "vaso",
+    "vasos",
+    "lata",
+    "latas",
+    "botella",
+    "botellas",
+    "combo",
+    "combos"
+  ]
+}
