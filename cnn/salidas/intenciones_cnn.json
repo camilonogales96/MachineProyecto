@@ -1,0 +1,6 @@
+{
+  "pedido": 0,
+  "consulta": 1,
+  "reclamo": 2,
+  "saludo_otro": 3
+}
