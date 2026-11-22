@@ -1,87 +1,90 @@
-# Text-CNN para clasificación y predicción de pedidos
+# Reconocimiento de productos del menú con Text-CNN
 
-Esta carpeta contiene una implementación independiente de Text-CNN. No modifica
-los archivos existentes del proyecto. Reutiliza el tokenizador y el vocabulario
-del repositorio, y guarda sus propios artefactos en `cnn/salidas`.
+Esta carpeta contiene un reconocedor independiente de productos. No modifica
+los modelos ni los archivos de preprocesamiento existentes. Reutiliza el
+tokenizador, el vocabulario, las anotaciones del dataset y la ontología del menú.
+
+La CNN ya no clasifica intenciones completas como `pedido` o `consulta`. Su
+objetivo es localizar una o varias menciones de productos dentro del mensaje,
+por ejemplo detectar `papitas` y normalizarla como `Papas Fritas`.
 
 ## Arquitectura
 
-El clasificador de intenciones es una CNN pura:
+1. Embedding de 128 dimensiones, aprendido desde cero.
+2. Tres convoluciones 1D paralelas con 100 filtros cada una y kernels 3, 4 y 5.
+3. ReLU en cada rama y concatenación de sus características por posición.
+4. Dropout de 0.3.
+5. Capa lineal que predice una etiqueta BIO para cada token: `O`,
+   `B-PRODUCTO` o `I-PRODUCTO`.
 
-1. Embedding de 128 dimensiones entrenado desde cero.
-2. Tres convoluciones 1D, con 100 filtros y kernels de tamaño 3, 4 y 5.
-3. ReLU y max pooling global temporal para cada kernel.
-4. Concatenación de las 300 características.
-5. Dropout de 0.3 y capa lineal de cuatro logits: `pedido`, `consulta`,
-   `reclamo` y `saludo_otro`.
+Se conserva la dimensión temporal en la salida. No se usa max pooling global,
+porque se necesitan las posiciones de los tokens para recortar las menciones.
+Las predicciones se normalizan con los sinónimos de `data\menu_ontology.json`.
+Los alias `papita` y `papitas` se normalizan a `Papas Fritas`.
 
-Para formar una comanda completa, `prediccion_cnn.py` usa la CNN para reconocer
-la intención y reutiliza el NER, el extractor de relaciones y el parser
-existentes. El modelo de intención sigue siendo CNN; los modelos base se usan
-solo en las etapas posteriores de extracción y estructuración.
+El catálogo objetivo incluye los 13 productos de la ontología, incluidas las
+bebidas. Las anotaciones de cantidad, ingredientes, exclusiones e intención se
+ignoran durante el entrenamiento de esta CNN.
 
-## Requisitos
+## Preparación
 
-Ejecuta los comandos desde la raíz del repositorio, `C:\MachineProyecto`.
-Activa el entorno virtual o usa directamente su ejecutable:
+Abre PowerShell en la raíz del proyecto (`C:\MachineProyecto`) y activa el
+entorno virtual:
 
 ```powershell
 .\venv\Scripts\Activate.ps1
 ```
 
-Los datos `data\dataset\train.json` y `data\dataset\val.json` deben estar
-preparados. La predicción de comandas también necesita los artefactos NER
-existentes en `models_saved`: `vocab.json`, `tag_vocab.json` y `ner_model.pt`.
+El dataset debe tener `data\dataset\train.json` y `data\dataset\val.json`, con
+los campos `tokens` y `bio_tags`. El entrenamiento transforma las etiquetas
+existentes y conserva únicamente los fragmentos BIO `PRODUCTO` que se pueden
+asociar con un producto del menú.
 
-## Entrenar la CNN
-
-Con el entorno virtual activado:
+## Entrenamiento
 
 ```powershell
 python cnn\entrenar_cnn.py
 ```
 
-O sin activar el entorno:
+El script informa la pérdida, la exactitud por token y el F1 de menciones.
+Guarda sus nuevos archivos en `cnn\salidas_productos`:
 
-```powershell
-.\venv\Scripts\python.exe cnn\entrenar_cnn.py
-```
+- `pesos_cnn.pt`: pesos del mejor modelo según F1 de menciones.
+- `vocabulario_cnn.json`: vocabulario construido solamente con `train.json`.
+- `etiquetas_cnn.json`: correspondencia entre etiquetas BIO e índices.
+- `graficas_cnn.png`: curvas de pérdida y métricas.
 
-El entrenamiento calcula Train Loss, Val Acc y F1-Macro, genera las gráficas y
-guarda los resultados en `cnn\salidas`:
-
-- `pesos_cnn.pt`
-- `vocabulario_cnn.json`
-- `intenciones_cnn.json`
-- `graficas_cnn.png`
-
-Se pueden ajustar las épocas y el tamaño de lote:
+Se pueden cambiar los parámetros desde la consola:
 
 ```powershell
 python cnn\entrenar_cnn.py --epocas 12 --tamano-lote 32
 ```
 
-## Probar una frase
+Se usa una carpeta de salida nueva para no reemplazar archivos creados por la
+versión anterior que clasificaba intenciones.
 
-Después de entrenar, inicia el modo interactivo:
+## Probar mensajes
+
+Después del entrenamiento, abre el modo interactivo:
 
 ```powershell
 python cnn\prediccion_cnn.py
 ```
 
-Escribe un mensaje cuando aparezca `Pedido:`. Por ejemplo:
+Escribe, por ejemplo:
 
 ```text
-Hola buenas tardes, quisiera 2 hamburguesas dobles sin cebolla y un refresco
+Quiero papitas y una Coca-Cola
 ```
 
-La salida contiene la intención, la comanda de cocina y el contrato JSON. Para
+La salida muestra las menciones encontradas y sus nombres canónicos. Para
 terminar, escribe `salir`.
 
-También se puede procesar una sola frase desde la consola:
+También se puede predecir una frase directamente:
 
 ```powershell
-python cnn\prediccion_cnn.py --texto "Quiero dos hamburguesas sin cebolla"
+python cnn\prediccion_cnn.py --texto "Quiero papitas y una Coca-Cola"
 ```
 
-Si no existen todavía los artefactos CNN, ejecuta primero el entrenamiento.
+Esta herramienta identifica productos solamente. No predice cantidades,
+modificaciones ni una intención conversacional.

@@ -1,10 +1,10 @@
-"""Predicción de intención y estructuración de pedidos con el modelo CNN."""
+"""Reconoce y normaliza menciones de productos usando el modelo Text-CNN."""
 
 import argparse
 import json
 import os
 import sys
-from typing import Any, Dict, Optional
+from typing import Dict, List, Optional
 
 import torch
 
@@ -14,45 +14,79 @@ RAIZ_PROYECTO = os.path.dirname(CARPETA_CNN)
 if RAIZ_PROYECTO not in sys.path:
     sys.path.insert(0, RAIZ_PROYECTO)
 
-from cnn.modelo_cnn import ClasificadorIntencionesCNN
-from src.models.ner_tagger import BiGRUNERTagger
-from src.models.relation_extractor import OrderRelationExtractor
+from cnn.modelo_cnn import (
+    ETIQUETAS_PRODUCTO,
+    ReconocedorProductosCNN,
+    normalizar_mencion_producto,
+)
 from src.preprocessing.tokenizer import SimpleSpanishTokenizer
-from src.preprocessing.vocabulary import TagVocabulary, Vocabulary
+from src.preprocessing.vocabulary import Vocabulary
 from src.structuring.parser import OrderParser
 
 
-class PipelinePedidosCNN:
-    """Usa Text-CNN para intención y reutiliza NER y parser existentes.
+def extraer_menciones(
+    tokens: List[str],
+    etiquetas: List[str],
+    parser: OrderParser,
+    nombres_menu: set,
+) -> List[Dict[str, str]]:
+    """Agrupa etiquetas BIO consecutivas y normaliza los productos reconocidos.
 
-    La CNN reemplaza únicamente la clasificación de intención. Para obtener una
-    comanda estructurada se conservan las etapas posteriores ya existentes del
-    proyecto: NER, extractor de relaciones, ontología y parser.
+    Se ignoran fragmentos cuyo nombre no corresponda a un producto del menú.
+    Una etiqueta ``I-PRODUCTO`` sin una etiqueta ``B-PRODUCTO`` previa se toma
+    como el inicio de un fragmento para tolerar errores de predicción.
     """
+    menciones = []
+    inicio = None
+
+    def cerrar_fragmento(fin: int):
+        if inicio is None or fin <= inicio:
+            return
+        mencion = " ".join(tokens[inicio:fin])
+        nombre_canonico = normalizar_mencion_producto(mencion, parser)
+        if nombre_canonico in nombres_menu:
+            menciones.append(
+                {
+                    "mencion": mencion,
+                    "producto_normalizado": nombre_canonico,
+                }
+            )
+
+    for posicion, etiqueta in enumerate(etiquetas):
+        if etiqueta == "B-PRODUCTO":
+            cerrar_fragmento(posicion)
+            inicio = posicion
+        elif etiqueta == "I-PRODUCTO":
+            if inicio is None:
+                inicio = posicion
+        else:
+            cerrar_fragmento(posicion)
+            inicio = None
+
+    cerrar_fragmento(len(tokens))
+    return menciones
+
+
+class IdentificadorProductosCNN:
+    """Carga la CNN y transforma un mensaje en productos del menú detectados."""
 
     def __init__(
         self,
         carpeta_salida: Optional[str] = None,
-        carpeta_modelos_base: Optional[str] = None,
         ruta_ontologia: Optional[str] = None,
         dispositivo: str = "cpu",
     ):
-        """Carga los recursos de inferencia de CNN y los recursos base de NER.
+        """Carga vocabulario, modelo y ontología, sin usar el clasificador de intención.
 
         Args:
-            carpeta_salida: directorio con pesos y vocabulario CNN.
-            carpeta_modelos_base: directorio con los pesos y vocabularios NER.
-            ruta_ontologia: archivo JSON con menú y sinónimos.
-            dispositivo: dispositivo de PyTorch, normalmente ``cpu`` o ``cuda``.
+            carpeta_salida: carpeta con los artefactos generados por entrenar_cnn.
+            ruta_ontologia: menú con los nombres canónicos y sus sinónimos.
+            dispositivo: dispositivo de PyTorch, ``cpu`` o ``cuda``.
         """
         self.dispositivo = dispositivo
         self.carpeta_salida = carpeta_salida or os.path.join(
             CARPETA_CNN,
-            "salidas",
-        )
-        self.carpeta_modelos_base = carpeta_modelos_base or os.path.join(
-            RAIZ_PROYECTO,
-            "models_saved",
+            "salidas_productos",
         )
         ruta_ontologia = ruta_ontologia or os.path.join(
             RAIZ_PROYECTO,
@@ -60,218 +94,129 @@ class PipelinePedidosCNN:
             "menu_ontology.json",
         )
 
-        with open(ruta_ontologia, "r", encoding="utf-8") as archivo:
-            ontologia = json.load(archivo)
-        self.tokenizador = SimpleSpanishTokenizer()
-        self.extractor_relaciones = OrderRelationExtractor(ontologia)
-        self.parser = OrderParser(ontologia)
-
-        ruta_pesos_cnn = os.path.join(self.carpeta_salida, "pesos_cnn.pt")
-        ruta_vocabulario_cnn = os.path.join(
+        ruta_pesos = os.path.join(self.carpeta_salida, "pesos_cnn.pt")
+        ruta_vocabulario = os.path.join(
             self.carpeta_salida,
             "vocabulario_cnn.json",
         )
-        ruta_intenciones = os.path.join(
-            self.carpeta_salida,
-            "intenciones_cnn.json",
-        )
-        archivos_cnn = (
-            ruta_pesos_cnn,
-            ruta_vocabulario_cnn,
-            ruta_intenciones,
-        )
-        faltantes = [ruta for ruta in archivos_cnn if not os.path.isfile(ruta)]
+        artefactos = (ruta_pesos, ruta_vocabulario)
+        faltantes = [ruta for ruta in artefactos if not os.path.isfile(ruta)]
         if faltantes:
             raise FileNotFoundError(
-                "No se encontraron los artefactos de la CNN. Ejecuta primero "
-                "'python cnn\\entrenar_cnn.py'. Faltan: "
+                "No se encontraron los artefactos del reconocedor de productos. "
+                "Ejecuta primero 'python cnn\\entrenar_cnn.py'. Faltan: "
                 + ", ".join(faltantes)
             )
 
-        self.vocabulario_cnn = Vocabulary.load(ruta_vocabulario_cnn)
-        with open(ruta_intenciones, "r", encoding="utf-8") as archivo:
-            mapa_intenciones = json.load(archivo)
-        self.intencion_por_indice = {
-            int(indice): intencion
-            for intencion, indice in mapa_intenciones.items()
+        self.vocabulario = Vocabulary.load(ruta_vocabulario)
+        with open(ruta_ontologia, "r", encoding="utf-8") as archivo:
+            ontologia = json.load(archivo)
+        self.parser = OrderParser(ontologia)
+        self.nombres_menu = {
+            producto["nombre"]
+            for grupo in ontologia.get("categorias", {}).values()
+            for producto in grupo
         }
+        self.tokenizador = SimpleSpanishTokenizer()
 
-        self.modelo_intenciones = ClasificadorIntencionesCNN(
-            vocab_size=len(self.vocabulario_cnn),
+        self.modelo = ReconocedorProductosCNN(
+            vocab_size=len(self.vocabulario),
             embedding_dim=128,
-            num_classes=len(mapa_intenciones),
+            num_tags=len(ETIQUETAS_PRODUCTO),
             filtros_por_kernel=100,
             tamanos_kernel=(3, 4, 5),
             dropout=0.3,
-            pad_idx=self.vocabulario_cnn.pad_idx,
+            pad_idx=self.vocabulario.pad_idx,
         ).to(self.dispositivo)
-        self.modelo_intenciones.load_state_dict(
-            torch.load(ruta_pesos_cnn, map_location=self.dispositivo)
+        self.modelo.load_state_dict(
+            torch.load(ruta_pesos, map_location=self.dispositivo)
         )
-        self.modelo_intenciones.eval()
+        self.modelo.eval()
 
-        # El NER conserva su vocabulario y sus pesos originales.
-        self.vocabulario_ner = Vocabulary.load(
-            os.path.join(self.carpeta_modelos_base, "vocab.json")
-        )
-        self.vocabulario_etiquetas = TagVocabulary.load(
-            os.path.join(self.carpeta_modelos_base, "tag_vocab.json")
-        )
-        self.modelo_ner = BiGRUNERTagger(
-            vocab_size=len(self.vocabulario_ner),
-            num_tags=len(self.vocabulario_etiquetas),
-            embedding_dim=128,
-            hidden_dim=128,
-            num_layers=2,
-            dropout=0.0,
-            pad_idx=self.vocabulario_ner.pad_idx,
-        ).to(self.dispositivo)
-        ruta_pesos_ner = os.path.join(
-            self.carpeta_modelos_base,
-            "ner_model.pt",
-        )
-        self.modelo_ner.load_state_dict(
-            torch.load(ruta_pesos_ner, map_location=self.dispositivo)
-        )
-        self.modelo_ner.eval()
+    def predecir(self, texto: str) -> Dict[str, List[Dict[str, str]]]:
+        """Devuelve las menciones y nombres del menú detectados en el texto.
 
-    def procesar(self, texto: str) -> Dict[str, Any]:
-        """Clasifica un texto y devuelve la comanda con formato de la pipeline.
-
-        Args:
-            texto: mensaje libre del cliente en español.
-
-        Returns:
-            Diccionario con texto, intención, tokens, etiquetas BIO, contrato
-            JSON y línea sintetizada para cocina. Si la intención no es pedido,
-            devuelve el marcador de esa intención y un contrato sin artículos.
+        La salida solo identifica productos; no predice intención, cantidad ni
+        modificaciones del pedido.
         """
         tokens = self.tokenizador.tokenize(texto)
         if not tokens:
-            return {
-                "texto_original": texto,
-                "intencion": "saludo_otro",
-                "tokens": [],
-                "bio_tags": [],
-                "contrato_json": {"intencion": "saludo_otro", "items": []},
-                "comanda_cocina": "[VACIO]",
-            }
+            return {"productos_identificados": []}
 
-        entrada_cnn = torch.tensor(
-            [self.vocabulario_cnn.encode(tokens)],
+        entrada = torch.tensor(
+            [self.vocabulario.encode(tokens)],
             dtype=torch.long,
             device=self.dispositivo,
         )
         with torch.no_grad():
-            indice_intencion = int(
-                self.modelo_intenciones.predict(entrada_cnn).item()
-            )
-        intencion = self.intencion_por_indice[indice_intencion]
+            predicciones = self.modelo.predict(entrada)[0].cpu().tolist()
 
-        if intencion != "pedido":
-            etiquetas_bio = ["O"] * len(tokens)
-            contrato = {
-                "intencion": intencion,
-                "items": [],
-                "restricciones_globales": [],
-                "notas": [],
-            }
-            return {
-                "texto_original": texto,
-                "intencion": intencion,
-                "tokens": tokens,
-                "bio_tags": etiquetas_bio,
-                "contrato_json": contrato,
-                "comanda_cocina": f"[{intencion.upper()}]",
-            }
-
-        entrada_ner = torch.tensor(
-            [self.vocabulario_ner.encode(tokens)],
-            dtype=torch.long,
-            device=self.dispositivo,
-        )
-        rutas = self.modelo_ner.decode(entrada_ner)
-        etiquetas_bio = self.vocabulario_etiquetas.decode(rutas[0])
-        etiquetas_bio = etiquetas_bio[: len(tokens)]
-        if len(etiquetas_bio) < len(tokens):
-            etiquetas_bio.extend(["O"] * (len(tokens) - len(etiquetas_bio)))
-
-        elementos = self.extractor_relaciones.extract_relations(
-            tokens,
-            etiquetas_bio,
-        )
-        contrato = self.parser.build_contract_json(intencion, elementos)
-        comanda = self.parser.format_kitchen_line(contrato)
-
-        return {
-            "texto_original": texto,
-            "intencion": intencion,
-            "tokens": tokens,
-            "bio_tags": etiquetas_bio,
-            "contrato_json": contrato,
-            "comanda_cocina": comanda,
+        etiqueta_por_indice = {
+            indice: etiqueta
+            for etiqueta, indice in ETIQUETAS_PRODUCTO.items()
         }
+        etiquetas = [
+            etiqueta_por_indice[indice]
+            for indice in predicciones
+        ]
+        productos = extraer_menciones(
+            tokens,
+            etiquetas,
+            self.parser,
+            self.nombres_menu,
+        )
+        return {"productos_identificados": productos}
 
 
 def leer_argumentos():
-    """Lee texto y rutas opcionales para la predicción.
-
-    Si no se entrega ``--texto``, el programa inicia un ciclo interactivo.
-    """
+    """Lee una frase y las rutas opcionales para realizar predicciones."""
     analizador = argparse.ArgumentParser(
-        description="Predice y estructura pedidos con Text-CNN."
+        description="Identifica productos del menú usando una CNN."
     )
     analizador.add_argument(
         "--texto",
-        help="Procesa una frase y termina; si se omite, inicia modo interactivo.",
+        help="Procesa una sola frase; si se omite, abre el modo interactivo.",
     )
     analizador.add_argument(
         "--carpeta-salida",
-        default=os.path.join(CARPETA_CNN, "salidas"),
-        help="Carpeta con los pesos y el vocabulario de la CNN.",
+        default=os.path.join(CARPETA_CNN, "salidas_productos"),
+        help="Carpeta donde entrenar_cnn guardó los pesos y vocabulario.",
     )
     analizador.add_argument(
-        "--carpeta-modelos-base",
-        default=os.path.join(RAIZ_PROYECTO, "models_saved"),
-        help="Carpeta con los pesos y vocabularios NER existentes.",
+        "--ruta-ontologia",
+        default=os.path.join(RAIZ_PROYECTO, "data", "menu_ontology.json"),
+        help="Archivo del menú para normalizar nombres de productos.",
     )
     return analizador.parse_args()
 
 
-def mostrar_resultado(resultado: Dict[str, Any]):
-    """Imprime la salida estructurada en un formato legible.
-
-    Args:
-        resultado: diccionario devuelto por ``PipelinePedidosCNN.procesar``.
-    """
-    print(f"Intención: {resultado['intencion']}")
-    print(f"Comanda Cocina: {resultado['comanda_cocina']}")
-    print(
-        "Contrato JSON: "
-        + json.dumps(
-            resultado["contrato_json"],
-            ensure_ascii=False,
-            indent=2,
-        )
-    )
+def mostrar_resultado(resultado: Dict[str, List[Dict[str, str]]]):
+    """Imprime las menciones reconocidas y su nombre canónico del menú."""
+    productos = resultado["productos_identificados"]
+    if productos:
+        nombres = [producto["producto_normalizado"] for producto in productos]
+        print("Productos identificados: " + ", ".join(nombres))
+    else:
+        print("No se reconocieron productos del menú.")
+    print(json.dumps(resultado, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
     argumentos = leer_argumentos()
     dispositivo = "cuda" if torch.cuda.is_available() else "cpu"
-    pipeline = PipelinePedidosCNN(
+    identificador = IdentificadorProductosCNN(
         carpeta_salida=argumentos.carpeta_salida,
-        carpeta_modelos_base=argumentos.carpeta_modelos_base,
+        ruta_ontologia=argumentos.ruta_ontologia,
         dispositivo=dispositivo,
     )
 
     if argumentos.texto:
-        mostrar_resultado(pipeline.procesar(argumentos.texto))
+        mostrar_resultado(identificador.predecir(argumentos.texto))
     else:
-        print("Escribe un pedido; escribe 'salir' para terminar.")
+        print("Escribe un mensaje; escribe 'salir' para terminar.")
         while True:
-            texto = input("\nPedido: ").strip()
+            texto = input("\nMensaje: ").strip()
             if texto.lower() in {"salir", "exit", "q"}:
                 break
             if texto:
-                mostrar_resultado(pipeline.procesar(texto))
+                mostrar_resultado(identificador.predecir(texto))
