@@ -24,7 +24,6 @@ if RAIZ_PROYECTO not in sys.path:
     sys.path.insert(0, RAIZ_PROYECTO)
 
 from cnn.modelo_cnn import (
-    ALIAS_PRODUCTO,
     ETIQUETAS_PRODUCTO,
     ReconocedorProductosCNN,
     normalizar_mencion_producto,
@@ -110,47 +109,6 @@ def preparar_registros(
             }
         )
     return preparados
-
-
-def generar_ejemplos_alias(ontologia: Dict, tokenizador: SimpleSpanishTokenizer) -> List[Dict]:
-    """Crea ejemplos sintéticos BIO para los sinónimos de productos del menú.
-
-    Estos ejemplos refuerzan la detección de alias menos frecuentes, como
-    ``papitas``, sin modificar los JSON originales. Se agregan únicamente a
-    entrenamiento; validación conserva sus ejemplos originales.
-    """
-    ejemplos = []
-    alias_por_producto = {}
-    for grupo in ontologia.get("categorias", {}).values():
-        for producto in grupo:
-            nombre = producto["nombre"]
-            alias_por_producto.setdefault(nombre, set()).add(nombre)
-            alias_por_producto[nombre].update(producto.get("sinonimos", []))
-
-    for alias, nombre in ALIAS_PRODUCTO.items():
-        if nombre in alias_por_producto:
-            alias_por_producto[nombre].add(alias)
-
-    contextos = (
-        ([], []),
-        (["quiero"], []),
-        (["quisiera"], ["por", "favor"]),
-        (["me", "das"], []),
-    )
-    for alias_por_nombre in alias_por_producto.values():
-        for alias in sorted(alias_por_nombre):
-            tokens_alias = tokenizador.tokenize(alias)
-            if not tokens_alias:
-                continue
-            for prefijo, sufijo in contextos:
-                tokens = list(prefijo) + tokens_alias + list(sufijo)
-                etiquetas = ["O"] * len(tokens)
-                inicio = len(prefijo)
-                etiquetas[inicio] = "B-PRODUCTO"
-                for posicion in range(inicio + 1, inicio + len(tokens_alias)):
-                    etiquetas[posicion] = "I-PRODUCTO"
-                ejemplos.append({"tokens": tokens, "etiquetas": etiquetas})
-    return ejemplos
 
 
 class ConjuntoProductos(Dataset):
@@ -328,8 +286,6 @@ def entrenar(
     if not entrenamiento or not validacion:
         raise ValueError("Se requieren ejemplos anotados para train y val.")
 
-    ejemplos_alias = generar_ejemplos_alias(ontologia, tokenizador)
-    entrenamiento.extend(ejemplos_alias)
     ejemplos_con_producto = sum(
         "B-PRODUCTO" in registro["etiquetas"]
         for registro in entrenamiento
@@ -337,8 +293,7 @@ def entrenar(
     print(
         f"Ejemplos: {len(entrenamiento)} entrenamiento, "
         f"{len(validacion)} validación; "
-        f"{ejemplos_con_producto} contienen productos del menú "
-        f"({len(ejemplos_alias)} ejemplos de alias añadidos)."
+        f"{ejemplos_con_producto} contienen productos del menú."
     )
 
     vocabulario = Vocabulary()
