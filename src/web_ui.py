@@ -32,6 +32,75 @@ EVAL_CACHE_PATH = os.path.join(MODELS_DIR, "eval_metrics.json")
 INTENT_CLASSES = ["pedido", "consulta", "reclamo", "saludo_otro"]
 
 
+def compute_f_beta(precision: float, recall: float, beta: float) -> float:
+    """Calcula F_beta = ((1 + beta^2) * P * R) / (beta^2 * P + R)."""
+    b2 = beta * beta
+    denom = b2 * precision + recall
+    if denom <= 0.0:
+        return 0.0
+    return ((1.0 + b2) * precision * recall) / denom
+
+
+def compute_classification_metrics(
+    cm: List[List[int]],
+    labels: List[str],
+) -> Dict[str, Any]:
+    """Calcula las 7 métricas de clasificación desde la matriz de confusión (One-vs-Rest + macro)."""
+    total = sum(sum(row) for row in cm)
+    correct = sum(cm[i][i] for i in range(len(labels)))
+    accuracy = (correct / total) if total > 0 else 0.0
+    error_rate = 1.0 - accuracy if total > 0 else 0.0
+
+    per_class: Dict[str, Dict[str, Any]] = {}
+    for idx, cls_name in enumerate(labels):
+        tp = cm[idx][idx]
+        fn = sum(cm[idx]) - tp
+        fp = sum(cm[r][idx] for r in range(len(labels))) - tp
+        tn = total - tp - fp - fn
+        support = tp + fn
+
+        precision = (tp / (tp + fp)) if (tp + fp) > 0 else 0.0
+        recall = (tp / (tp + fn)) if (tp + fn) > 0 else 0.0  # Sensibilidad / TPR
+        specificity = (tn / (tn + fp)) if (tn + fp) > 0 else 0.0  # Especificidad / TNR
+        f1 = compute_f_beta(precision, recall, 1.0)
+        f05 = compute_f_beta(precision, recall, 0.5)
+        f2 = compute_f_beta(precision, recall, 2.0)
+
+        per_class[cls_name] = {
+            "tp": int(tp),
+            "fp": int(fp),
+            "fn": int(fn),
+            "tn": int(tn),
+            "support": int(support),
+            "precision": round(precision, 4),
+            "recall": round(recall, 4),
+            "specificity": round(specificity, 4),
+            "f1": round(f1, 4),
+            "f0_5": round(f05, 4),
+            "f2": round(f2, 4),
+        }
+
+    n_cls = max(1, len(labels))
+    macro_precision = sum(c["precision"] for c in per_class.values()) / n_cls
+    macro_recall = sum(c["recall"] for c in per_class.values()) / n_cls
+    macro_specificity = sum(c["specificity"] for c in per_class.values()) / n_cls
+    macro_f1 = sum(c["f1"] for c in per_class.values()) / n_cls
+    macro_f05 = sum(c["f0_5"] for c in per_class.values()) / n_cls
+    macro_f2 = sum(c["f2"] for c in per_class.values()) / n_cls
+
+    return {
+        "intent_accuracy": round(accuracy, 4),
+        "intent_error_rate": round(error_rate, 4),
+        "intent_precision_macro": round(macro_precision, 4),
+        "intent_recall_macro": round(macro_recall, 4),
+        "intent_specificity_macro": round(macro_specificity, 4),
+        "intent_f1_macro": round(macro_f1, 4),
+        "intent_f0_5_macro": round(macro_f05, 4),
+        "intent_f2_macro": round(macro_f2, 4),
+        "per_class": per_class,
+    }
+
+
 class PipelineService:
     """Gestiona la carga del pipeline PyTorch, estadísticas del dataset y evaluación."""
 
@@ -141,11 +210,7 @@ class PipelineService:
         if not os.path.exists(test_path):
             return {"ok": False, "error": "No se encontró data/dataset/test.json."}
 
-        from sklearn.metrics import (
-            accuracy_score,
-            confusion_matrix,
-            precision_recall_fscore_support,
-        )
+        from sklearn.metrics import confusion_matrix
 
         with open(test_path, "r", encoding="utf-8") as f:
             test_data = json.load(f)
@@ -217,25 +282,8 @@ class PipelineService:
         elapsed_ms = (time.perf_counter() - t_start) * 1000
         avg_latency_ms = round(elapsed_ms / max(1, len(test_data)), 2)
 
-        acc = float(accuracy_score(y_true_intent, y_pred_intent))
-        prec, rec, f1, sup = precision_recall_fscore_support(
-            y_true_intent,
-            y_pred_intent,
-            labels=INTENT_CLASSES,
-            zero_division=0,
-        )
         cm = confusion_matrix(y_true_intent, y_pred_intent, labels=INTENT_CLASSES).tolist()
-
-        per_class = {}
-        for idx, cls_name in enumerate(INTENT_CLASSES):
-            per_class[cls_name] = {
-                "precision": round(float(prec[idx]), 4),
-                "recall": round(float(rec[idx]), 4),
-                "f1": round(float(f1[idx]), 4),
-                "support": int(sup[idx]),
-            }
-
-        f1_macro = round(float(sum(f1) / len(INTENT_CLASSES)), 4)
+        cls_metrics = compute_classification_metrics(cm, INTENT_CLASSES)
 
         ner_f1 = None
         try:
@@ -256,9 +304,7 @@ class PipelineService:
             "evaluated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
             "test_samples": len(test_data),
             "total_orders": total_orders,
-            "intent_accuracy": round(acc, 4),
-            "intent_f1_macro": f1_macro,
-            "per_class": per_class,
+            **cls_metrics,
             "confusion_labels": INTENT_CLASSES,
             "confusion_matrix": cm,
             "ner_f1_strict": ner_f1,

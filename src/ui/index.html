@@ -593,6 +593,111 @@
       font-size: 0.84rem;
       color: var(--ink-muted);
     }
+
+    .acc-err-bar {
+      display: flex;
+      height: 28px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--bg-subtle);
+      margin: 10px 0 8px;
+    }
+
+    .acc-seg {
+      background: var(--basil);
+      color: #fff;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .err-seg {
+      background: var(--crimson);
+      color: #fff;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .beta-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 0.82rem;
+    }
+
+    .beta-input {
+      width: 72px;
+      padding: 5px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.82rem;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .beta-pill {
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .beta-pill.active, .beta-pill:hover {
+      border-color: var(--plum);
+      background: var(--plum-bg);
+      color: var(--plum);
+    }
+
+    .metrics-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      margin-top: 8px;
+    }
+
+    .metrics-table th, .metrics-table td {
+      padding: 8px 6px;
+      border-bottom: 1px solid var(--border);
+      text-align: right;
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    .metrics-table th:first-child, .metrics-table td:first-child {
+      text-align: left;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-weight: 600;
+    }
+
+    .metrics-table th {
+      color: var(--ink-muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+    }
+
+    .metrics-table tr.macro-row td {
+      font-weight: 700;
+      background: var(--bg);
+      border-top: 1.5px solid var(--ink);
+    }
   </style>
 </head>
 <body>
@@ -1009,22 +1114,105 @@
       }
     }
 
+    let lastEvalMetrics = null;
+    let currentBeta = 2.0;
+
+    function calcFBeta(p, r, beta) {
+      const b2 = beta * beta;
+      const denom = b2 * p + r;
+      return denom > 0 ? ((1 + b2) * p * r) / denom : 0;
+    }
+
+    function renderGroupedMetricsSvg(perClass, beta) {
+      const classes = Object.keys(perClass);
+      const width = 560;
+      const height = 215;
+      const padL = 36;
+      const padB = 34;
+      const padT = 18;
+      const chartH = height - padT - padB;
+      const groupW = (width - padL - 10) / Math.max(1, classes.length);
+      const barW = 16;
+      const gap = 4;
+      const series = [
+        { key: "recall", label: "Sensibilidad", color: "#2b6b3e" },
+        { key: "specificity", label: "Especificidad", color: "#264d7a" },
+        { key: "precision", label: "Precisión", color: "#c84b31" },
+        { key: "f1", label: "F1", color: "#9c5d0f" },
+        { key: "fbeta", label: `Fβ (β=${beta})`, color: "#6d3b6e" },
+      ];
+
+      let parts = [];
+      [0, 0.25, 0.5, 0.75, 1].forEach((frac) => {
+        const y = padT + chartH * (1 - frac);
+        parts.push(`<line x1="${padL}" y1="${y}" x2="${width - 8}" y2="${y}" stroke="#e7dfd1" stroke-dasharray="3 3" />`);
+        parts.push(`<text x="${padL - 6}" y="${y + 4}" text-anchor="end" font-size="9.5" fill="#5d554d">${Math.round(frac * 100)}%</text>`);
+      });
+
+      classes.forEach((cls, i) => {
+        const s = perClass[cls];
+        const fbetaVal = calcFBeta(s.precision || 0, s.recall || 0, beta);
+        const vals = [s.recall || 0, s.specificity || 0, s.precision || 0, s.f1 || 0, fbetaVal];
+        const totalBarsW = series.length * barW + (series.length - 1) * gap;
+        const gx = padL + i * groupW + Math.max(4, (groupW - totalBarsW) / 2);
+
+        vals.forEach((v, j) => {
+          const bh = Math.max(2, v * chartH);
+          const x = gx + j * (barW + gap);
+          const y = padT + chartH - bh;
+          parts.push(
+            `<rect x="${x}" y="${y}" width="${barW}" height="${bh}" rx="3" fill="${series[j].color}">` +
+            `<title>${cls} · ${series[j].label}: ${(v * 100).toFixed(1)}%</title></rect>`
+          );
+        });
+        parts.push(
+          `<text x="${gx + totalBarsW / 2}" y="${height - 10}" text-anchor="middle" font-size="11" font-weight="600" fill="#1e1a17">${cls}</text>`
+        );
+      });
+
+      return `
+        <svg viewBox="0 0 ${width} ${height}" width="100%" style="max-height:240px;" role="img" aria-label="Métricas de clasificación por clase">
+          ${parts.join("")}
+        </svg>
+        <div class="chart-legend">
+          ${series.map((s) => `<span class="legend-item"><span class="legend-swatch" style="background:${s.color};"></span>${s.label}</span>`).join("")}
+        </div>
+      `;
+    }
+
     function renderEvalMetrics(m) {
+      lastEvalMetrics = m;
       document.getElementById("evalMetaText").textContent =
         `Última evaluación: ${m.evaluated_at} · ${m.test_samples} mensajes evaluados (${m.total_orders} pedidos) · Latencia media: ${m.avg_latency_ms} ms`;
 
       const pct = (v) => (v === null || v === undefined ? "—" : `${(v * 100).toFixed(1)}%`);
-      const perClassRows = Object.entries(m.per_class || {})
-        .map(([cls, s]) => {
-          const wF1 = Math.round((s.f1 || 0) * 100);
+      const acc = m.intent_accuracy ?? 0;
+      const errRate = m.intent_error_rate ?? Math.max(0, 1 - acc);
+      const perClass = m.per_class || {};
+      const classes = Object.keys(perClass);
+
+      // Recalcular macro F_beta con currentBeta
+      const fbetaVals = classes.map((c) => calcFBeta(perClass[c].precision || 0, perClass[c].recall || 0, currentBeta));
+      const macroFBeta = fbetaVals.length ? fbetaVals.reduce((a, b) => a + b, 0) / fbetaVals.length : 0;
+      const macroSens = m.intent_recall_macro ?? (classes.length ? classes.reduce((a, c) => a + (perClass[c].recall || 0), 0) / classes.length : 0);
+      const macroSpec = m.intent_specificity_macro ?? (classes.length ? classes.reduce((a, c) => a + (perClass[c].specificity || 0), 0) / classes.length : 0);
+      const macroPrec = m.intent_precision_macro ?? (classes.length ? classes.reduce((a, c) => a + (perClass[c].precision || 0), 0) / classes.length : 0);
+
+      // Tabla por clase
+      const tableRows = classes
+        .map((cls) => {
+          const s = perClass[cls];
+          const fb = calcFBeta(s.precision || 0, s.recall || 0, currentBeta);
           return `
-            <div class="bar-row" style="grid-template-columns:105px 1fr 165px;">
-              <strong>${cls}</strong>
-              <div class="bar-track"><div class="bar-fill" style="width:${wF1}%;background:#2b6b3e;"></div></div>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:0.74rem;text-align:right;">
-                F1 ${pct(s.f1)} · P ${pct(s.precision)} · R ${pct(s.recall)}
-              </span>
-            </div>`;
+            <tr>
+              <td>${cls}</td>
+              <td>${pct(s.recall)}</td>
+              <td>${pct(s.specificity)}</td>
+              <td>${pct(s.precision)}</td>
+              <td>${pct(s.f1)}</td>
+              <td>${pct(fb)}</td>
+              <td>${s.support ?? "—"}</td>
+            </tr>`;
         })
         .join("");
 
@@ -1054,31 +1242,87 @@
       document.getElementById("evalContent").innerHTML = `
         <div class="kpi-grid" style="margin-bottom:18px;">
           <div class="kpi-card">
-            <div class="label">Accuracy Intención</div>
-            <div class="value">${pct(m.intent_accuracy)}</div>
-            <div class="sub">F1-Macro: ${pct(m.intent_f1_macro)}</div>
+            <div class="label">Exactitud / Tasa de Error</div>
+            <div class="value">${pct(acc)}</div>
+            <div class="sub">Tasa de error: ${pct(errRate)}</div>
           </div>
           <div class="kpi-card">
-            <div class="label">NER (F1 / Token Acc)</div>
-            <div class="value">${m.ner_f1_strict !== null ? pct(m.ner_f1_strict) : pct(m.ner_token_accuracy)}</div>
-            <div class="sub">Token Acc: ${pct(m.ner_token_accuracy)}</div>
+            <div class="label">Sensibilidad / Especificidad</div>
+            <div class="value">${pct(macroSens)}</div>
+            <div class="sub">Especificidad Macro: ${pct(macroSpec)}</div>
           </div>
           <div class="kpi-card">
-            <div class="label">Exact Match JSON</div>
+            <div class="label">Precisión / F1 / Fβ</div>
+            <div class="value">${pct(m.intent_f1_macro)}</div>
+            <div class="sub">P: ${pct(macroPrec)} · Fβ(${currentBeta}): ${pct(macroFBeta)}</div>
+          </div>
+          <div class="kpi-card">
+            <div class="label">NER &amp; Exact Match JSON</div>
             <div class="value">${pct(m.json_exact_match)}</div>
-            <div class="sub">Exact Match Orden: ${pct(m.order_exact_match)}</div>
-          </div>
-          <div class="kpi-card">
-            <div class="label">Reducción de Lectura</div>
-            <div class="value">${pct(m.text_reduction)}</div>
-            <div class="sub">Latencia: ${m.avg_latency_ms} ms/msg</div>
+            <div class="sub">NER: ${m.ner_f1_strict !== null ? pct(m.ner_f1_strict) : pct(m.ner_token_accuracy)} · Reducción: ${pct(m.text_reduction)}</div>
           </div>
         </div>
 
+        <!-- Gráfica 1: Exactitud vs Tasa de Error -->
+        <div style="border:1px solid var(--border);border-radius:12px;padding:16px;background:#fcfaf5;margin-bottom:18px;">
+          <div class="panel-title" style="margin-bottom:4px;">
+            <span>Exactitud vs. Tasa de Error</span>
+            <span style="font-weight:500;text-transform:none;letter-spacing:0;">(TP+TN)/(P+N) vs (FP+FN)/(P+N)</span>
+          </div>
+          <div class="acc-err-bar">
+            <div class="acc-seg" style="width:${(acc * 100).toFixed(2)}%;">Exactitud ${pct(acc)}</div>
+            <div class="err-seg" style="width:${(errRate * 100).toFixed(2)}%;">${errRate > 0.06 ? `Error ${pct(errRate)}` : ""}</div>
+          </div>
+          <div class="chart-legend" style="margin-top:4px;">
+            <span class="legend-item"><span class="legend-swatch" style="background:var(--basil);"></span>Exactitud / Reconocimiento: <strong>${pct(acc)}</strong></span>
+            <span class="legend-item"><span class="legend-swatch" style="background:var(--crimson);"></span>Tasa de error / Clasificación errónea: <strong>${pct(errRate)}</strong></span>
+          </div>
+        </div>
+
+        <!-- Gráfica 2: Barras agrupadas por clase + selector beta -->
+        <div style="border:1px solid var(--border);border-radius:12px;padding:16px;background:#fcfaf5;margin-bottom:18px;">
+          <div class="panel-title">
+            <span>Sensibilidad, Especificidad, Precisión, F1 y Fβ por Clase</span>
+            <div class="beta-controls">
+              <span>β:</span>
+              <button class="beta-pill ${currentBeta === 0.5 ? "active" : ""}" data-beta="0.5" type="button">0.5</button>
+              <button class="beta-pill ${currentBeta === 1.0 ? "active" : ""}" data-beta="1.0" type="button">1.0</button>
+              <button class="beta-pill ${currentBeta === 2.0 ? "active" : ""}" data-beta="2.0" type="button">2.0</button>
+              <input id="betaInput" class="beta-input" type="number" min="0" step="0.1" value="${currentBeta}" aria-label="Valor de beta" />
+            </div>
+          </div>
+          ${renderGroupedMetricsSvg(perClass, currentBeta)}
+        </div>
+
+        <!-- Tabla detallada + Matriz de Confusión -->
         <div class="charts-grid" style="margin-bottom:0;">
-          <div style="border:1px solid var(--border);border-radius:12px;padding:16px;background:#fcfaf5;">
-            <div class="panel-title"><span>Rendimiento por Clase de Intención</span></div>
-            ${perClassRows}
+          <div style="border:1px solid var(--border);border-radius:12px;padding:16px;background:#fcfaf5;overflow-x:auto;">
+            <div class="panel-title"><span>Resumen Numérico (One-vs-Rest)</span></div>
+            <table class="metrics-table">
+              <thead>
+                <tr>
+                  <th>Clase</th>
+                  <th>Sens. (TPR)</th>
+                  <th>Espec. (TNR)</th>
+                  <th>Precisión</th>
+                  <th>F1</th>
+                  <th>Fβ (${currentBeta})</th>
+                  <th>Soporte</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${tableRows}
+                <tr class="macro-row">
+                  <td>Macro Avg</td>
+                  <td>${pct(macroSens)}</td>
+                  <td>${pct(macroSpec)}</td>
+                  <td>${pct(macroPrec)}</td>
+                  <td>${pct(m.intent_f1_macro)}</td>
+                  <td>${pct(macroFBeta)}</td>
+                  <td>${m.test_samples}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
           <div style="border:1px solid var(--border);border-radius:12px;padding:16px;background:#fcfaf5;">
             <div class="panel-title"><span>Matriz de Confusión (Real vs. Predicho)</span></div>
@@ -1091,6 +1335,24 @@
           </div>
         </div>
       `;
+
+      // Eventos interactivos de beta
+      document.querySelectorAll(".beta-pill").forEach((pill) => {
+        pill.addEventListener("click", () => {
+          currentBeta = parseFloat(pill.dataset.beta);
+          renderEvalMetrics(lastEvalMetrics);
+        });
+      });
+      const betaInput = document.getElementById("betaInput");
+      if (betaInput) {
+        betaInput.addEventListener("change", () => {
+          const v = parseFloat(betaInput.value);
+          if (!Number.isNaN(v) && v >= 0) {
+            currentBeta = v;
+            renderEvalMetrics(lastEvalMetrics);
+          }
+        });
+      }
     }
 
     async function analyzeMessage() {
