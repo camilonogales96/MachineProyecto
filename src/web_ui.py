@@ -15,6 +15,7 @@ import os
 import sys
 import time
 import webbrowser
+import subprocess
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Dict, List, Optional
 
@@ -108,6 +109,8 @@ class PipelineService:
         self.device = device
         self.pipeline = None
         self.load_error: Optional[str] = None
+        self.lstm_process = None
+        self.lstm_output = ""
         self._load_pipeline()
 
     def _load_pipeline(self) -> None:
@@ -177,6 +180,41 @@ class PipelineService:
                 stats["eval_metrics"] = None
 
         return stats
+
+    def predict_lstm(self, texto: str) -> Dict[str, Any]:
+        lstm_dir = os.path.join(PROJECT_ROOT, "lstm")
+        script = os.path.join(lstm_dir, "prediccion_lstm.py")
+        outputs_dir = os.path.join(lstm_dir, "salidas")
+        required = ["modelo_lstm.keras", "metadata_lstm.json", "tokenizador_entrada.json", "tokenizador_salida.json"]
+
+        if not os.path.exists(script):
+            return {"ok": False, "error": "No se encontró lstm/prediccion_lstm.py"}
+        if not all(os.path.exists(os.path.join(outputs_dir, name)) for name in required):
+            return {"ok": False, "error": "Entrena el modelo LSTM antes de realizar una predicción."}
+
+        t0 = time.perf_counter()
+        try:
+            completed = subprocess.run(
+                [sys.executable, script, "--texto", texto],
+                cwd=PROJECT_ROOT,
+                capture_output=True,
+                text=True,
+                timeout=60,
+                check=False,
+            )
+        except Exception as exc:
+            return {"ok": False, "error": f"Error ejecutando el modelo LSTM: {exc}"}
+
+        if completed.returncode != 0:
+            error = (completed.stderr or completed.stdout or "Error desconocido").strip()
+            return {"ok": False, "error": error[-3000:]}
+
+        return {
+            "ok": True,
+            "texto": texto,
+            "comanda": completed.stdout.strip(),
+            "latency_ms": round((time.perf_counter() - t0) * 1000, 2),
+        }
 
     def predict(self, texto: str) -> Dict[str, Any]:
         t0 = time.perf_counter()
@@ -321,6 +359,51 @@ class PipelineService:
 
         return {"ok": True, "eval_metrics": metrics}
 
+    def get_lstm_status(self) -> Dict[str, Any]:
+        lstm_dir = os.path.join(PROJECT_ROOT, "lstm")
+        outputs_dir = os.path.join(lstm_dir, "salidas")
+        required = ["modelo_lstm.keras", "metadata_lstm.json", "tokenizador_entrada.json", "tokenizador_salida.json"]
+        model_ready = all(os.path.exists(os.path.join(outputs_dir, name)) for name in required)
+        training = self.lstm_process is not None and self.lstm_process.poll() is None
+
+        return {
+            "ok": True,
+            "model_ready": model_ready,
+            "training": training,
+            "train_script": os.path.exists(os.path.join(lstm_dir, "entrenar_lstm.py")),
+            "output": self.lstm_output[-4000:],
+        }
+
+    def train_lstm(self, epochs: int = 40, batch_size: int = 32) -> Dict[str, Any]:
+        lstm_dir = os.path.join(PROJECT_ROOT, "lstm")
+        script = os.path.join(lstm_dir, "entrenar_lstm.py")
+        if not os.path.exists(script):
+            return {"ok": False, "error": "No se encontró lstm/entrenar_lstm.py"}
+        if self.lstm_process is not None and self.lstm_process.poll() is None:
+            return {"ok": False, "error": "Ya hay un entrenamiento LSTM en ejecución."}
+
+        epochs = max(1, min(int(epochs), 200))
+        batch_size = max(1, min(int(batch_size), 256))
+        self.lstm_output = ""
+        self.lstm_process = subprocess.Popen(
+            [sys.executable, script, "--epochs", str(epochs), "--batch-size", str(batch_size)],
+            cwd=PROJECT_ROOT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+        )
+
+        import threading
+
+        def capture_output() -> None:
+            if self.lstm_process and self.lstm_process.stdout:
+                for line in self.lstm_process.stdout:
+                    self.lstm_output += line
+
+        threading.Thread(target=capture_output, daemon=True).start()
+        return {"ok": True, "message": "Entrenamiento LSTM iniciado."}
+
 
 def create_handler(service: PipelineService):
     class OrderUIHandler(BaseHTTPRequestHandler):
@@ -353,6 +436,10 @@ def create_handler(service: PipelineService):
                 self._send_json(service.get_status())
                 return
 
+            if self.path == "/api/lstm_status":
+                self._send_json(service.get_lstm_status())
+                return
+
             self.send_error(404, "Ruta no encontrada")
 
         def do_POST(self) -> None:
@@ -377,6 +464,41 @@ def create_handler(service: PipelineService):
 
             if self.path == "/api/evaluate":
                 result = service.evaluate_test_set()
+                status = 200 if result.get("ok") else 503
+                self._send_json(result, status=status)
+                return
+
+            if self.path == "/api/train_lstm":
+                content_len = int(self.headers.get("Content-Length", 0))
+                raw = self.rfile.read(content_len)
+                try:
+                    data = json.loads(raw.decode("utf-8"))
+                except Exception:
+                    self._send_json({"ok": False, "error": "JSON inválido"}, status=400)
+                    return
+
+                epochs = data.get("epochs", 40)
+                batch_size = data.get("batch_size", 32)
+                result = service.train_lstm(epochs=epochs, batch_size=batch_size)
+                status = 200 if result.get("ok") else 503
+                self._send_json(result, status=status)
+                return
+
+            if self.path == "/api/predict_lstm":
+                content_len = int(self.headers.get("Content-Length", 0))
+                raw = self.rfile.read(content_len)
+                try:
+                    data = json.loads(raw.decode("utf-8"))
+                except Exception:
+                    self._send_json({"ok": False, "error": "JSON inválido"}, status=400)
+                    return
+
+                texto = str(data.get("texto", "")).strip()
+                if not texto:
+                    self._send_json({"ok": False, "error": "Ingresa un mensaje para analizar."}, status=400)
+                    return
+
+                result = service.predict_lstm(texto)
                 status = 200 if result.get("ok") else 503
                 self._send_json(result, status=status)
                 return

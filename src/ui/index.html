@@ -436,6 +436,8 @@
     .telemetry-view { display: none; }
     .telemetry-view.active { display: block; }
     .workspace-view.hidden { display: none; }
+    .lstm-view { display: none; }
+    .lstm-view.active { display: block; }
 
     .kpi-grid {
       display: grid;
@@ -715,6 +717,7 @@
         <div class="tabs" role="tablist">
           <button class="tab-btn active" data-tab="workspace" type="button">Analizador</button>
           <button class="tab-btn" data-tab="telemetry" type="button">Dataset y Modelo</button>
+          <button class="tab-btn" data-tab="lstm" type="button">LSTM</button>
         </div>
       </div>
     </header>
@@ -845,6 +848,38 @@
         </div>
       </div>
     </section>
+
+    <!-- TAB 3: LSTM -->
+    <section class="lstm-view" id="lstmView">
+      <div class="charts-grid">
+        <div class="panel">
+          <div class="panel-title">
+            <span>Entrenamiento LSTM</span>
+            <span id="lstmStatusLabel" style="font-weight:500;text-transform:none;letter-spacing:0;">Verificando...</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;">
+            <label>Épocas<br /><input id="lstmEpochs" type="number" min="1" max="200" value="40" style="width:100%;margin-top:6px;padding:9px;border:1px solid var(--border);border-radius:8px;background:var(--paper);" /></label>
+            <label>Tamaño de lote<br /><input id="lstmBatchSize" type="number" min="1" max="256" value="32" style="width:100%;margin-top:6px;padding:9px;border:1px solid var(--border);border-radius:8px;background:var(--paper);" /></label>
+          </div>
+          <button class="btn-primary" id="trainLstmBtn" type="button">Entrenar modelo LSTM</button>
+          <pre id="lstmTrainingOutput" class="json-box" style="margin-top:16px;min-height:220px;max-height:320px;overflow:auto;">Sin entrenamiento iniciado.</pre>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title"><span>Predicción con LSTM</span></div>
+          <textarea id="lstmTextInput" placeholder="Ej.: Hola, quisiera dos hamburguesas dobles sin cebolla"></textarea>
+          <div class="composer-actions">
+            <button class="btn-ghost" id="clearLstmBtn" type="button">Limpiar</button>
+            <button class="btn-primary" id="predictLstmBtn" type="button">Predecir pedido</button>
+          </div>
+          <div class="ticket" style="margin-top:18px;min-height:120px;">
+            <div class="ticket-head"><span class="ticket-id">RESULTADO LSTM</span></div>
+            <div class="order-text" id="lstmOutput">Entrena el modelo para comenzar...</div>
+            <div class="ticket-foot"><span id="lstmLatency">Latencia: —</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
   <script>
@@ -877,6 +912,7 @@
         const target = btn.dataset.tab;
         document.getElementById("workspaceView").classList.toggle("hidden", target !== "workspace");
         document.getElementById("telemetryView").classList.toggle("active", target === "telemetry");
+        document.getElementById("lstmView").classList.toggle("active", target === "lstm");
       });
     });
 
@@ -1448,6 +1484,64 @@
     }
 
     loadStatus();
+
+    async function refreshLstmStatus() {
+      try {
+        const res = await fetch("/api/lstm_status");
+        const data = await res.json();
+        const statusLabel = document.getElementById("lstmStatusLabel");
+        statusLabel.textContent = data.training ? "Entrenando..." : (data.model_ready ? "Modelo listo" : "Modelo no entrenado");
+        if (data.output) document.getElementById("lstmTrainingOutput").textContent = data.output;
+      } catch (error) {
+        document.getElementById("lstmStatusLabel").textContent = "Servidor no disponible";
+      }
+    }
+
+    setInterval(refreshLstmStatus, 3000);
+    refreshLstmStatus();
+
+    document.getElementById("trainLstmBtn").addEventListener("click", async () => {
+      const epochs = Number(document.getElementById("lstmEpochs").value);
+      const batchSize = Number(document.getElementById("lstmBatchSize").value);
+      const output = document.getElementById("lstmTrainingOutput");
+      output.textContent = "Iniciando entrenamiento LSTM...";
+      try {
+        const res = await fetch("/api/train_lstm", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ epochs, batch_size: batchSize })
+        });
+        const data = await res.json();
+        if (!data.ok) output.textContent = data.error || "No se pudo iniciar el entrenamiento.";
+        refreshLstmStatus();
+      } catch (error) {
+        output.textContent = "Error de conexión: " + error;
+      }
+    });
+
+    document.getElementById("clearLstmBtn").addEventListener("click", () => {
+      document.getElementById("lstmTextInput").value = "";
+      document.getElementById("lstmTextInput").focus();
+    });
+
+    document.getElementById("predictLstmBtn").addEventListener("click", async () => {
+      const texto = document.getElementById("lstmTextInput").value.trim();
+      if (!texto) return;
+      const output = document.getElementById("lstmOutput");
+      output.textContent = "Procesando...";
+      try {
+        const res = await fetch("/api/predict_lstm", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ texto })
+        });
+        const data = await res.json();
+        output.textContent = data.ok ? (data.comanda || "Sin predicción") : (data.error || "Error del modelo LSTM");
+        document.getElementById("lstmLatency").textContent = data.latency_ms ? `Latencia: ${data.latency_ms} ms` : "Latencia: —";
+      } catch (error) {
+        output.textContent = "Error de conexión: " + error;
+      }
+    });
   </script>
 </body>
 </html>

@@ -1,0 +1,10 @@
+{
+  "max_entrada": 51,
+  "max_salida": 32,
+  "ejemplos_entrenamiento": 1849,
+  "ejemplos_validacion": 387,
+  "dataset": [
+    "train.json",
+    "val.json"
+  ]
+}
