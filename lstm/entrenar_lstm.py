@@ -2,6 +2,7 @@ import os
 import json
 import random
 import argparse
+import time
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
@@ -90,7 +91,8 @@ def main():
 
     os.makedirs(SALIDAS_DIR, exist_ok=True)
 
-    modelo.fit(
+    inicio_entrenamiento = time.time()
+    historial = modelo.fit(
         x_entrenamiento,
         np.expand_dims(y_entrenamiento, -1),
         epochs=args.epochs,
@@ -99,6 +101,7 @@ def main():
         callbacks=[EarlyStopping(monitor="val_loss", patience=4, restore_best_weights=True)],
         verbose=1
     )
+    tiempo_entrenamiento = round(time.time() - inicio_entrenamiento, 2)
 
     modelo.save(os.path.join(SALIDAS_DIR, "modelo_lstm.keras"))
 
@@ -117,6 +120,15 @@ def main():
     }
     with open(os.path.join(SALIDAS_DIR, "metadata_lstm.json"), "w", encoding="utf-8") as archivo:
         json.dump(metadata, archivo, ensure_ascii=False, indent=2)
+
+    with open(os.path.join(SALIDAS_DIR, "historial_lstm.json"), "w", encoding="utf-8") as archivo:
+        json.dump({
+            "history": historial.history,
+            "epochs_requested": args.epochs,
+            "epochs_completed": len(historial.history.get("loss", [])),
+            "batch_size": args.batch_size,
+            "training_seconds": tiempo_entrenamiento,
+        }, archivo, ensure_ascii=False, indent=2)
 
     print(f"Modelo guardado en: {SALIDAS_DIR}")
 

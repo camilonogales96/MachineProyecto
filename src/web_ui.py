@@ -404,6 +404,45 @@ class PipelineService:
         threading.Thread(target=capture_output, daemon=True).start()
         return {"ok": True, "message": "Entrenamiento LSTM iniciado."}
 
+    def get_lstm_metrics(self) -> Dict[str, Any]:
+        lstm_dir = os.path.join(PROJECT_ROOT, "lstm")
+        outputs_dir = os.path.join(lstm_dir, "salidas")
+        metadata_path = os.path.join(outputs_dir, "metadata_lstm.json")
+        history_path = os.path.join(outputs_dir, "historial_lstm.json")
+
+        metadata = {}
+        history = {}
+        if os.path.exists(metadata_path):
+            with open(metadata_path, "r", encoding="utf-8") as f:
+                metadata = json.load(f)
+        if os.path.exists(history_path):
+            with open(history_path, "r", encoding="utf-8") as f:
+                history = json.load(f)
+
+        test_samples = 0
+        test_path = os.path.join(DATASET_DIR, "test.json")
+        if os.path.exists(test_path):
+            with open(test_path, "r", encoding="utf-8") as f:
+                test_samples = len(json.load(f))
+
+        history_data = history.get("history", {})
+        losses = history_data.get("loss", [])
+        val_losses = history_data.get("val_loss", [])
+        accuracies = history_data.get("accuracy", [])
+        val_accuracies = history_data.get("val_accuracy", [])
+
+        return {
+            "ok": True,
+            "available": bool(history),
+            "metadata": metadata,
+            "history": history,
+            "test_samples": test_samples,
+            "final_loss": losses[-1] if losses else None,
+            "final_val_loss": val_losses[-1] if val_losses else None,
+            "final_accuracy": accuracies[-1] if accuracies else None,
+            "final_val_accuracy": val_accuracies[-1] if val_accuracies else None,
+        }
+
 
 def create_handler(service: PipelineService):
     class OrderUIHandler(BaseHTTPRequestHandler):
@@ -438,6 +477,10 @@ def create_handler(service: PipelineService):
 
             if self.path == "/api/lstm_status":
                 self._send_json(service.get_lstm_status())
+                return
+
+            if self.path == "/api/lstm_metrics":
+                self._send_json(service.get_lstm_metrics())
                 return
 
             self.send_error(404, "Ruta no encontrada")
